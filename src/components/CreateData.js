@@ -5,22 +5,8 @@ import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage
 import { useAuth } from "./Auth/AuthContext";
 import { Collapse } from "react-collapse";
 import { objectTypes } from "./constants";
-/*************  ✨ Codeium Command ⭐  *************/
-/**
- * CreateForm is a React component that provides a form interface for adding new records to the database.
- * 
- * The form includes fields for object details such as object ID, title, type, and description. It also 
- * automatically populates the createdByEmail, creationDate, and modifiedDate fields based on the current 
- * user's email and the current date.
- * 
- * The component uses state to manage form data and section visibility, and it provides functionality for
- * toggling form sections and handling input changes. Upon form submission, the data is validated and 
- * submitted to the Firebase database, with feedback provided to the user regarding the success or failure 
- * of the operation.
- */
 
-/******  c302af58-7246-4c07-98ae-80fc4d8fa910  *******/
-const CreateForm = () => {
+const CreateData = ({ onCancel }) => {
   const { currentUser } = useAuth();
   const [openSections, setOpenSections] = useState({ general: true, multimedia: false });
   const [formData, setFormData] = useState({
@@ -35,6 +21,8 @@ const CreateForm = () => {
     object_images: [],
     object_audio: [],
   });
+
+  const [loading, setLoading] = useState(false);
 
   const toggleSection = (section) => {
     setOpenSections((prev) => ({
@@ -54,17 +42,29 @@ const CreateForm = () => {
 
   const uploadFiles = async (files, folder) => {
     const urls = [];
+    let thumbnailUrl = null;
+
     for (const file of files) {
       const storagePath = `${folder}/${file.name}`;
       const fileRef = storageRef(storage, storagePath);
+
+      // Upload the file
       await uploadBytes(fileRef, file);
+
+      // Get the file's download URL
       const fileURL = await getDownloadURL(fileRef);
+
+      // Set the first file's URL as the thumbnail
+      if (!thumbnailUrl) {
+        thumbnailUrl = fileURL;
+      }
+
+      // Add the URL to the list of uploaded file URLs
       urls.push(fileURL);
     }
-    return urls;
-  };
 
-  const [loading, setLoading] = useState(false);
+    return { urls, thumbnailUrl };
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,15 +79,21 @@ const CreateForm = () => {
     setLoading(true);
 
     try {
-      const imagesURLs = await uploadFiles(formData.object_images, "images");
+      // Upload images and generate their URLs and a thumbnail URL
+      const { urls: imagesURLs, thumbnailUrl } = await uploadFiles(formData.object_images, "images");
+
+      // Upload audio files
       const audioURLs = await uploadFiles(formData.object_audio, "audio");
 
+      // Prepare the updated form data
       const updatedFormData = {
         ...formData,
         object_images: imagesURLs,
         object_audio: audioURLs,
+        thumbnailUrl: thumbnailUrl || null, // Add the thumbnail URL to the record
       };
 
+      // Push the record to Firebase
       const recordsRef = dbRef(db, "objects");
       await push(recordsRef, updatedFormData);
 
@@ -104,6 +110,9 @@ const CreateForm = () => {
         object_images: [],
         object_audio: [],
       });
+
+      // Navigate back to RecordManager
+      if (onCancel) onCancel();
     } catch (error) {
       console.error("Error adding record:", error);
       alert("Failed to add record. Please try again.");
@@ -113,9 +122,10 @@ const CreateForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-4 bg-white shadow-md rounded-md">
+      <h2 className="text-2xl font-bold mb-4">Create New Record</h2>
       <div>
-        <button type="button" onClick={() => toggleSection("general")}>
+        <button type="button" onClick={() => toggleSection("general")} className="mb-2 bg-gray-200 p-2 rounded">
           General Information
         </button>
         <Collapse isOpened={openSections.general}>
@@ -127,6 +137,7 @@ const CreateForm = () => {
               value={formData.object_id}
               onChange={handleInputChange}
               required
+              className="block w-full mb-2 p-2 border rounded"
             />
             <input
               type="text"
@@ -134,12 +145,14 @@ const CreateForm = () => {
               placeholder="Object Title"
               value={formData.object_title}
               onChange={handleInputChange}
+              className="block w-full mb-2 p-2 border rounded"
             />
             <select
               name="object_type"
               value={formData.object_type}
               onChange={handleInputChange}
               required
+              className="block w-full mb-2 p-2 border rounded"
             >
               <option value="">Select Object Type</option>
               {objectTypes.map((type) => (
@@ -154,19 +167,21 @@ const CreateForm = () => {
               placeholder="Title"
               value={formData.title}
               onChange={handleInputChange}
+              className="block w-full mb-2 p-2 border rounded"
             />
             <textarea
               name="description"
               placeholder="Description"
               value={formData.description}
               onChange={handleInputChange}
+              className="block w-full mb-2 p-2 border rounded"
             />
           </div>
         </Collapse>
       </div>
 
       <div>
-        <button type="button" onClick={() => toggleSection("multimedia")}>
+        <button type="button" onClick={() => toggleSection("multimedia")} className="mb-2 bg-gray-200 p-2 rounded">
           Multimedia
         </button>
         <Collapse isOpened={openSections.multimedia}>
@@ -177,6 +192,7 @@ const CreateForm = () => {
               multiple
               accept="image/*"
               onChange={(e) => handleFileChange(e, "object_images")}
+              className="block w-full mb-2"
             />
             <label>Upload Audio:</label>
             <input
@@ -184,16 +200,30 @@ const CreateForm = () => {
               multiple
               accept="audio/*"
               onChange={(e) => handleFileChange(e, "object_audio")}
+              className="block w-full mb-2"
             />
           </div>
         </Collapse>
       </div>
 
-      <button type="submit" disabled={loading}>
-        Submit
-      </button>
+      <div className="flex justify-between mt-4">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Submit
+        </button>
+      </div>
     </form>
   );
 };
 
-export default CreateForm;
+export default CreateData;

@@ -24,10 +24,15 @@ function exportRecordsToCSV() {
     .then((snapshot) => {
       if (snapshot.exists()) {
         const records = snapshot.val();
-        const recordsArray = Object.keys(records).map((key) => ({
-          id: key, // Firebase-generated key
-          ...records[key], // Include all fields in the record
-        }));
+        const recordsArray = Object.keys(records).map((key) => {
+          const { object_images = [], object_audio = [], ...rest } = records[key];
+          return {
+            id: key, // Firebase-generated key
+            ...rest, // Include all other fields
+            object_images: object_images.join("; "), // Combine image URLs into a single string
+            object_audio: object_audio.join("; "), // Combine audio URLs into a single string
+          };
+        });
         const csvContent = convertToCSV(recordsArray);
         downloadCSV(csvContent, "object_records.csv");
       } else {
@@ -50,7 +55,13 @@ function convertToCSV(data) {
   // Map each record to a CSV row
   const rows = data.map((record) =>
     Object.values(record)
-      .map((value) => `"${String(value).replace(/"/g, '""')}"`) // Escape quotes in values
+      .map((value) => {
+        // Convert arrays to strings and escape quotes
+        if (Array.isArray(value)) {
+          return `"${value.join("; ").replace(/"/g, '""')}"`;
+        }
+        return `"${String(value).replace(/"/g, '""')}"`; // Escape quotes in values
+      })
       .join(",")
   );
 

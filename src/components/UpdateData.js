@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
 import { ref, update } from "firebase/database";
-import { objectTypes } from "./constants"; // Import objectTypes from constants.js
+import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { objectTypes } from "./constants";
 
 function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
   const [formData, setFormData] = useState({
@@ -13,14 +14,21 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
     createdByEmail: "",
     creationDate: "",
     modifiedDate: "",
+    object_images: [],
+    object_audio: [],
   });
 
-  // Populate formData with the selected record's data when it changes
+  const [newImages, setNewImages] = useState([]);
+  const [newAudio, setNewAudio] = useState([]);
+  const [imagesToDelete, setImagesToDelete] = useState([]);
+
   useEffect(() => {
     if (selectedRecord) {
       setFormData({
         ...selectedRecord,
-        modifiedDate: new Date().toISOString(), // Automatically update the modified date
+        object_images: selectedRecord.object_images || [], // Ensure it's an array
+        object_audio: selectedRecord.object_audio || [], // Ensure it's an array
+        modifiedDate: new Date().toISOString(), // Automatically update modified date
       });
     }
   }, [selectedRecord]);
@@ -33,6 +41,30 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
     }));
   };
 
+  const handleFileChange = (e, setFiles) => {
+    setFiles(Array.from(e.target.files));
+  };
+
+  const handleDeleteImage = (imageUrl) => {
+    setImagesToDelete((prev) => [...prev, imageUrl]);
+    setFormData((prev) => ({
+      ...prev,
+      object_images: (prev.object_images || []).filter((url) => url !== imageUrl),
+    }));
+  };
+
+  const uploadFiles = async (files, folder) => {
+    const urls = [];
+    for (const file of files) {
+      const storagePath = `${folder}/${file.name}`;
+      const fileRef = storageRef(storage, storagePath);
+      await uploadBytes(fileRef, file);
+      const fileURL = await getDownloadURL(fileRef);
+      urls.push(fileURL);
+    }
+    return urls;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -41,13 +73,30 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
       return;
     }
 
-    const recordRef = ref(db, `objects/${selectedRecord.id}`); // Use the Firebase-generated key
-    const updatedRecord = { ...formData, modifiedDate: new Date().toISOString() }; // Include the updated modified date
+    const recordRef = ref(db, `objects/${selectedRecord.id}`);
+    const updatedRecord = { ...formData, modifiedDate: new Date().toISOString() };
 
     try {
-      await update(recordRef, updatedRecord); // Update the record in Firebase
+      // Delete selected images
+      for (const imageUrl of imagesToDelete) {
+        const imageRef = storageRef(storage, imageUrl);
+        await deleteObject(imageRef);
+      }
+
+      // Upload new multimedia files
+      if (newImages.length > 0) {
+        const imageUrls = await uploadFiles(newImages, "images");
+        updatedRecord.object_images = [...(formData.object_images || []), ...imageUrls];
+      }
+      if (newAudio.length > 0) {
+        const audioUrls = await uploadFiles(newAudio, "audio");
+        updatedRecord.object_audio = [...(formData.object_audio || []), ...audioUrls];
+      }
+
+      // Update the record in Firebase
+      await update(recordRef, updatedRecord);
       alert("Record updated successfully!");
-      if (onRecordUpdated) onRecordUpdated(updatedRecord); // Notify the parent component of the update
+      if (onRecordUpdated) onRecordUpdated(updatedRecord); // Notify the parent component
     } catch (error) {
       console.error("Error updating record:", error.message);
       alert("Failed to update record. Please try again.");
@@ -68,7 +117,7 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
               onChange={handleChange}
               placeholder="Enter object ID"
               className="block w-full mt-1 p-2 border rounded-md"
-              readOnly // Prevent changes to the human-readable object_id
+              readOnly
             />
           </div>
           <div>
@@ -119,6 +168,54 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
               className="block w-full mt-1 p-2 border rounded-md"
             ></textarea>
           </div>
+
+          {/* Existing Images */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Existing Images</label>
+            <div className="grid grid-cols-2 gap-4 mt-2">
+              {(formData.object_images || []).map((imageUrl, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={imageUrl}
+                    alt={`Object ${index + 1}`}
+                    className="w-full h-auto rounded-lg shadow"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteImage(imageUrl)}
+                    className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Add New Images */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Add New Images</label>
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => handleFileChange(e, setNewImages)}
+              className="block w-full mt-1"
+            />
+          </div>
+
+          {/* Add New Audio */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Add New Audio</label>
+            <input
+              type="file"
+              multiple
+              accept="audio/*"
+              onChange={(e) => handleFileChange(e, setNewAudio)}
+              className="block w-full mt-1"
+            />
+          </div>
+
           <div className="flex justify-between mt-4">
             <button
               type="button"

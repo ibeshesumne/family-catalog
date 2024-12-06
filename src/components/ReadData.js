@@ -27,7 +27,7 @@ function ReadData() {
       }
 
       const allRecords = Object.entries(snapshot.val()).map(([id, data]) => ({
-        id,
+        id, // Firebase key
         ...data,
       }));
       setRecords(allRecords);
@@ -37,39 +37,14 @@ function ReadData() {
   }, [currentUser, userType]);
 
   const headers = [
-    { label: "ID", key: "id" },
-    { label: "British Museum Record", key: "british_museum_record" },
+    { label: "ID (Firebase Key)", key: "id" },
+    { label: "Object ID", key: "object_id" },
     { label: "Object Title", key: "object_title" },
     { label: "Object Type", key: "object_type" },
-    { label: "Museum Number", key: "museum_number" },
     { label: "Title", key: "title" },
     { label: "Description", key: "description" },
-    { label: "Production Ethnic Group", key: "production_ethnic_group" },
-    { label: "Culture Period", key: "culture_period" },
-    { label: "Producer Name", key: "producer_name" },
-    { label: "School Style", key: "school_style" },
-    { label: "Production Date", key: "production_date" },
-    { label: "Production Place", key: "production_place" },
-    { label: "Excavator/Field Collector", key: "excavator_field_collector" },
-    { label: "Findspot", key: "findspot" },
-    { label: "Materials", key: "materials" },
-    { label: "Ware", key: "ware" },
-    { label: "Technique", key: "technique" },
-    { label: "Dimensions (H x W x D)", key: "dimensions_h_w_d" },
-    { label: "Inscriptions", key: "inscriptions" },
-    { label: "Acquisition Name", key: "acquisition_name" },
-    { label: "Previous Owner", key: "previous_owner" },
-    { label: "Acquisition Date", key: "acquisition_date" },
-    { label: "Acquisition Notes", key: "acquisition_notes" },
-    { label: "Curator Comment", key: "curator_comment" },
-    { label: "Bibliographic References", key: "bibliographic_references" },
-    { label: "Object Location", key: "object_location" },
-    { label: "Exhibition History", key: "exhibition_history" },
-    { label: "Condition", key: "condition" },
-    { label: "Subjects", key: "subjects" },
-    { label: "Object Images", key: "object_images" },
-    { label: "Object Audio", key: "object_audio" },
-    { label: "Notes", key: "notes" },
+    { label: "Creation Date", key: "creationDate" },
+    { label: "Modified Date", key: "modifiedDate" },
   ];
 
   const handleRecordClick = (record) => setSelectedRecord(record);
@@ -95,37 +70,13 @@ function ReadData() {
           <h2 className="text-2xl font-bold text-center mb-6">Record Details</h2>
           <div className="space-y-4">
             <div><strong>ID:</strong> {selectedRecord.id}</div>
-            <div><strong>British Museum Record:</strong> {selectedRecord.british_museum_record}</div>
+            <div><strong>Object ID:</strong> {selectedRecord.object_id}</div>
             <div><strong>Object Title:</strong> {selectedRecord.object_title}</div>
             <div><strong>Object Type:</strong> {selectedRecord.object_type}</div>
-            <div><strong>Museum Number:</strong> {selectedRecord.museum_number}</div>
             <div><strong>Title:</strong> {selectedRecord.title}</div>
             <div><strong>Description:</strong> {selectedRecord.description}</div>
-            <div><strong>Production Ethnic Group:</strong> {selectedRecord.production_ethnic_group}</div>
-            <div><strong>Culture Period:</strong> {selectedRecord.culture_period}</div>
-            <div><strong>Producer Name:</strong> {selectedRecord.producer_name}</div>
-            <div><strong>School Style:</strong> {selectedRecord.school_style}</div>
-            <div><strong>Production Date:</strong> {selectedRecord.production_date}</div>
-            <div><strong>Production Place:</strong> {selectedRecord.production_place}</div>
-            <div><strong>Excavator/Field Collector:</strong> {selectedRecord.excavator_field_collector}</div>
-            <div><strong>Findspot:</strong> {selectedRecord.findspot}</div>
-            <div><strong>Materials:</strong> {selectedRecord.materials}</div>
-            <div><strong>Ware:</strong> {selectedRecord.ware}</div>
-            <div><strong>Technique:</strong> {selectedRecord.technique}</div>
-            <div><strong>Dimensions:</strong> {selectedRecord.dimensions_h_w_d}</div>
-            <div><strong>Inscriptions:</strong> {selectedRecord.inscriptions}</div>
-            <div><strong>Acquisition Name:</strong> {selectedRecord.acquisition_name}</div>
-            <div><strong>Previous Owner:</strong> {selectedRecord.previous_owner}</div>
-            <div><strong>Acquisition Date:</strong> {selectedRecord.acquisition_date}</div>
-            <div><strong>Acquisition Notes:</strong> {selectedRecord.acquisition_notes}</div>
-            <div><strong>Curator Comment:</strong> {selectedRecord.curator_comment}</div>
-            <div><strong>Bibliographic References:</strong> {selectedRecord.bibliographic_references}</div>
-            <div><strong>Object Location:</strong> {selectedRecord.object_location}</div>
-            <div><strong>Exhibition History:</strong> {selectedRecord.exhibition_history}</div>
-            <div><strong>Condition:</strong> {selectedRecord.condition}</div>
-            <div><strong>Subjects:</strong> {selectedRecord.subjects}</div>
-            <div><strong>Object Images:</strong> {selectedRecord.object_images.join(", ")}</div>
-            <div><strong>Object Audio:</strong> {selectedRecord.object_audio.join(", ")}</div>
+            <div><strong>Creation Date:</strong> {selectedRecord.creationDate}</div>
+            <div><strong>Modified Date:</strong> {selectedRecord.modifiedDate}</div>
           </div>
           <div className="flex justify-between mt-6">
             <button
@@ -172,8 +123,8 @@ function ReadData() {
                 className="p-4 border border-gray-300 rounded flex justify-between items-center"
               >
                 <div>
-                  <strong>ID:</strong> {record.id} | <strong>Title:</strong> {record.object_title} |{" "}
-                  <strong>Type:</strong> {record.object_type}
+                  <strong>ID:</strong> {record.id} | <strong>Object ID:</strong> {record.object_id} |{" "}
+                  <strong>Title:</strong> {record.object_title} | <strong>Type:</strong> {record.object_type}
                 </div>
                 <button
                   onClick={() => handleRecordClick(record)}

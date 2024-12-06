@@ -19,6 +19,7 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage"; // For Storage
+import { enableLogging } from "firebase/database";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -70,7 +71,7 @@ export const fetchAllObjects = async () => {
       return {};
     }
   } catch (error) {
-    console.error("Error fetching objects data:", error);
+    console.error("Error fetching objects data:", error.message);
     throw error;
   }
 };
@@ -83,7 +84,7 @@ export const fetchLimitedObjects = async (limit = 10) => {
     const snapshot = await get(limitedQuery);
     return snapshot.val() || {};
   } catch (error) {
-    console.error("Error fetching limited objects data:", error);
+    console.error("Error fetching limited objects data:", error.message);
     throw error;
   }
 };
@@ -95,7 +96,7 @@ export const fetchObjectByKey = async (key) => {
     const snapshot = await get(objectRef);
     return snapshot.val() || null;
   } catch (error) {
-    console.error("Error fetching object by key:", error);
+    console.error("Error fetching object by key:", error.message);
     throw error;
   }
 };
@@ -109,7 +110,7 @@ export const uploadFile = async (file, folder = "uploads") => {
     console.log(`File uploaded successfully: ${downloadURL}`);
     return downloadURL;
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error("Error uploading file:", error.message);
     throw error;
   }
 };
@@ -122,7 +123,10 @@ export const fetchFileURL = async (path) => {
     console.log(`File URL fetched: ${downloadURL}`);
     return downloadURL;
   } catch (error) {
-    console.error("Error fetching file URL:", error);
+    console.error("Error fetching file URL:", error.message);
     throw error;
   }
 };
+
+// Enable logging for Firebase
+enableLogging(true);

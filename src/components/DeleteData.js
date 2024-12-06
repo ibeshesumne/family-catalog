@@ -24,17 +24,18 @@ function DeleteData() {
       return;
     }
 
-    if (!recordId) {
+    if (!recordId.trim()) {
       alert("Please enter a valid Record ID.");
       return;
     }
 
-    const recordRef = ref(db, `objects/${recordId}`); // Adjusted to `objects` node
+    const recordRef = ref(db, `objects/${recordId}`); // Firebase key used to locate the record
 
     try {
+      // Attempt to remove the record
       await remove(recordRef);
       alert("Record deleted successfully!");
-      setRecordId("");
+      setRecordId(""); // Reset the input field
     } catch (error) {
       console.error("Error deleting record:", error.message);
       alert("Error deleting record. Please try again.");
@@ -47,8 +48,8 @@ function DeleteData() {
         <h2 className="text-2xl font-bold text-center mb-6">Delete Record</h2>
         <p className="text-gray-600 mb-4">
           To delete a record, please enter the <strong>Record ID</strong> in the box below. 
-          You can find the Record ID in the "Your Records" section. Ensure your email is 
-          verified before proceeding.
+          The Record ID is the system-generated key associated with the record. You can 
+          find it in the "Your Records" section.
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

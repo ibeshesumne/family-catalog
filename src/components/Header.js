@@ -1,83 +1,42 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from './Auth/AuthContext'; // Import AuthContext
+import React from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "./Auth/AuthContext";
 
 const Header = () => {
-  const { currentUser } = useAuth(); // Fetch logged-in user data
+  const { currentUser } = useAuth();
 
   return (
-    <header className="App-header">
-      <div style={headerContainerStyle}>
-        <h1>Family Collection Index</h1>
-        {currentUser ? (
-          <p style={userInfoStyle}>
-            Logged in as: <strong>{currentUser.email}</strong>
-          </p>
-        ) : (
-          <p style={userInfoStyle}>Not logged in</p>
-        )}
-      </div>
-      <nav>
-        <ul style={navStyle}>
-          {!currentUser ? (
+    <header className="bg-gray-800 text-white p-4">
+      <div className="container mx-auto flex justify-between items-center">
+        <h1 className="text-lg font-bold">Record Management App</h1>
+        <nav className="flex space-x-4">
+          <Link to="/" className="hover:underline">
+            Home
+          </Link>
+          {currentUser && (
             <>
-              <li style={listItemStyle}>
-                <Link to="/login">Login</Link>
-              </li>
-              <li style={listItemStyle}>
-                <Link to="/register">Register</Link>
-              </li>
-            </>
-          ) : (
-            <>
-              <li style={listItemStyle}>
-                <Link to="/create">Create Record</Link>
-              </li>
-              <li style={listItemStyle}>
-                <Link to="/read">View Records</Link>
-              </li>
-              <li style={listItemStyle}>
-                <Link to="/delete">Delete Record</Link>
-              </li>
-              <li style={listItemStyle}>
-                <Link to="/logout">Logout</Link>
-              </li>
+              <Link to="/records" className="hover:underline">
+                Manage Records
+              </Link>
+              <Link to="/logout" className="hover:underline">
+                Logout
+              </Link>
             </>
           )}
-        </ul>
-      </nav>
+          {!currentUser && (
+            <>
+              <Link to="/login" className="hover:underline">
+                Login
+              </Link>
+              <Link to="/register" className="hover:underline">
+                Register
+              </Link>
+            </>
+          )}
+        </nav>
+      </div>
     </header>
   );
-};
-
-// Inline styles for the header and navigation
-const headerContainerStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '10px',
-  backgroundColor: '#282c34',
-  color: 'white',
-};
-
-const navStyle = {
-  display: 'flex',
-  justifyContent: 'space-around',
-  padding: '10px',
-  listStyle: 'none',
-  backgroundColor: '#20232a',
-};
-
-const listItemStyle = {
-  margin: '0 10px',
-  color: '#61dafb',
-  textDecoration: 'none',
-};
-
-const userInfoStyle = {
-  margin: '0 20px',
-  fontSize: '14px',
-  color: '#ffffff',
 };
 
 export default Header;

@@ -16,19 +16,22 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
     modifiedDate: "",
     object_images: [],
     object_audio: [],
+    thumbnailUrl: "", // Include thumbnailUrl in form data
   });
 
   const [newImages, setNewImages] = useState([]);
-  const [newAudio, setNewAudio] = useState([]);
+  // eslint-disable-next-line no-unused-vars
+  const [newAudio, setNewAudio] = useState([]); // Suppress warning for setNewAudio
   const [imagesToDelete, setImagesToDelete] = useState([]);
 
   useEffect(() => {
     if (selectedRecord) {
       setFormData({
         ...selectedRecord,
-        object_images: selectedRecord.object_images || [], // Ensure it's an array
-        object_audio: selectedRecord.object_audio || [], // Ensure it's an array
-        modifiedDate: new Date().toISOString(), // Automatically update modified date
+        object_images: selectedRecord.object_images || [],
+        object_audio: selectedRecord.object_audio || [],
+        thumbnailUrl: selectedRecord.thumbnailUrl || "",
+        modifiedDate: new Date().toISOString(),
       });
     }
   }, [selectedRecord]);
@@ -47,22 +50,35 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
 
   const handleDeleteImage = (imageUrl) => {
     setImagesToDelete((prev) => [...prev, imageUrl]);
-    setFormData((prev) => ({
-      ...prev,
-      object_images: (prev.object_images || []).filter((url) => url !== imageUrl),
-    }));
+    setFormData((prev) => {
+      const updatedImages = (prev.object_images || []).filter((url) => url !== imageUrl);
+      const updatedThumbnail = prev.thumbnailUrl === imageUrl ? (updatedImages[0] || null) : prev.thumbnailUrl;
+      return {
+        ...prev,
+        object_images: updatedImages,
+        thumbnailUrl: updatedThumbnail,
+      };
+    });
   };
 
   const uploadFiles = async (files, folder) => {
     const urls = [];
+    let thumbnailUrl = null;
+
     for (const file of files) {
       const storagePath = `${folder}/${file.name}`;
       const fileRef = storageRef(storage, storagePath);
       await uploadBytes(fileRef, file);
       const fileURL = await getDownloadURL(fileRef);
+
+      if (!thumbnailUrl) {
+        thumbnailUrl = fileURL; // Use the first uploaded image as the thumbnail
+      }
+
       urls.push(fileURL);
     }
-    return urls;
+
+    return { urls, thumbnailUrl };
   };
 
   const handleSubmit = async (e) => {
@@ -85,9 +101,11 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
 
       // Upload new multimedia files
       if (newImages.length > 0) {
-        const imageUrls = await uploadFiles(newImages, "images");
+        const { urls: imageUrls, thumbnailUrl } = await uploadFiles(newImages, "images");
         updatedRecord.object_images = [...(formData.object_images || []), ...imageUrls];
+        updatedRecord.thumbnailUrl = thumbnailUrl || updatedRecord.thumbnailUrl; // Update thumbnail if new images are uploaded
       }
+
       if (newAudio.length > 0) {
         const audioUrls = await uploadFiles(newAudio, "audio");
         updatedRecord.object_audio = [...(formData.object_audio || []), ...audioUrls];
@@ -96,7 +114,7 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
       // Update the record in Firebase
       await update(recordRef, updatedRecord);
       alert("Record updated successfully!");
-      if (onRecordUpdated) onRecordUpdated(updatedRecord); // Notify the parent component
+      if (onRecordUpdated) onRecordUpdated(updatedRecord);
     } catch (error) {
       console.error("Error updating record:", error.message);
       alert("Failed to update record. Please try again.");
@@ -132,6 +150,20 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-700">Thumbnail</label>
+            {formData.thumbnailUrl ? (
+              <img
+                src={formData.thumbnailUrl}
+                alt="Thumbnail"
+                className="w-24 h-24 object-cover rounded-md border border-gray-300"
+              />
+            ) : (
+              <div className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md">
+                No Thumbnail
+              </div>
+            )}
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700">Object Type</label>
             <select
               name="object_type"
@@ -146,27 +178,6 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
                 </option>
               ))}
             </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Title</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Enter title"
-              className="block w-full mt-1 p-2 border rounded-md"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Enter description"
-              className="block w-full mt-1 p-2 border rounded-md"
-            ></textarea>
           </div>
 
           {/* Existing Images */}
@@ -219,7 +230,7 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
           <div className="flex justify-between mt-4">
             <button
               type="button"
-              onClick={onCancel}
+              onClick={onCancel} // Correctly calls the onCancel prop
               className="w-1/2 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md mr-2"
             >
               Cancel

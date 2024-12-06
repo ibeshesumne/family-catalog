@@ -1,17 +1,27 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client"; // Use createRoot API for React 18+
+import { BrowserRouter } from "react-router-dom";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { AuthProvider } from "./components/Auth/AuthContext"; // Import AuthProvider
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+// Create root and render the application
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <App />
+    <AuthProvider>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true, // Opt into React startTransition behavior for state updates
+          v7_relativeSplatPath: true, // Enable new relative route resolution within Splat routes
+        }}
+      >
+        <App />
+      </BrowserRouter>
+    </AuthProvider>
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+// Optional: Log performance metrics
 reportWebVitals();

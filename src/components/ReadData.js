@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { ref, onValue, query, orderByChild, equalTo } from "firebase/database";
+import { ref, onValue, query, orderByChild, equalTo, get } from "firebase/database";
 import { useAuth } from "./Auth/AuthContext"; // Ensure correct path to AuthContext
 import { CSVLink } from "react-csv";
 
 function ReadData({ onSelectRecord, onDelete, onCreate }) {
-  const [records, setRecords] = useState([]); // State to hold records from Firebase
+  const [records, setRecords] = useState([]); // State to hold all records from Firebase
+  const [filteredRecords, setFilteredRecords] = useState([]); // State to hold search results
+  const [searchQuery, setSearchQuery] = useState(""); // State to manage the search input
   const { currentUser, userType } = useAuth(); // Authentication context
 
   // Fetch records from Firebase Realtime Database
@@ -25,6 +27,7 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
     const unsubscribe = onValue(recordsQuery, (snapshot) => {
       if (!snapshot.exists()) {
         setRecords([]); // No records found
+        setFilteredRecords([]);
         return;
       }
 
@@ -35,10 +38,45 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
       }));
 
       setRecords(allRecords); // Update state with fetched records
+      setFilteredRecords(allRecords); // Initially show all records
     });
 
     return () => unsubscribe(); // Cleanup subscription on unmount
   }, [currentUser, userType]);
+
+  // Handle search functionality
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      setFilteredRecords(records); // Show all records if search query is empty
+      return;
+    }
+
+    const dbRef = ref(db, "objects");
+
+    // Prepare queries for each field
+    const keywordQuery = query(dbRef, orderByChild("keyword"), equalTo(searchQuery));
+    const placeQuery = query(dbRef, orderByChild("place"), equalTo(searchQuery));
+    const objectIdQuery = query(dbRef, orderByChild("object_id"), equalTo(searchQuery));
+
+    try {
+      // Fetch results for all queries
+      const [keywordSnapshot, placeSnapshot, objectIdSnapshot] = await Promise.all([
+        get(keywordQuery),
+        get(placeQuery),
+        get(objectIdQuery),
+      ]);
+
+      // Combine results from all queries
+      const results = [];
+      keywordSnapshot.forEach((child) => results.push(child.val()));
+      placeSnapshot.forEach((child) => results.push(child.val()));
+      objectIdSnapshot.forEach((child) => results.push(child.val()));
+
+      setFilteredRecords(results); // Update state with filtered records
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+    }
+  };
 
   // CSV headers for exporting data
   const headers = [
@@ -62,6 +100,36 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
           You can also export the data as a CSV file.
         </p>
 
+        {/* Search Section */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search by keyword, place, or object ID"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              padding: "10px",
+              width: "300px",
+              marginRight: "10px",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+            }}
+          />
+          <button
+            onClick={handleSearch}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#007BFF",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            Search
+          </button>
+        </div>
+
         {/* Create New Record Button */}
         <div className="mb-4">
           <button
@@ -83,11 +151,11 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
         </CSVLink>
 
         {/* Records Listing */}
-        {records.length === 0 ? (
+        {filteredRecords.length === 0 ? (
           <p className="text-gray-500">No records available</p>
         ) : (
           <ul className="list-none p-0 space-y-4">
-            {records.map((record) => (
+            {filteredRecords.map((record) => (
               <li
                 key={record.id}
                 className="p-4 border border-gray-300 rounded flex justify-between items-center"

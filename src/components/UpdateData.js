@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../firebase";
 import { ref, update } from "firebase/database";
+import { objectTypes } from "./constants"; // Import objectTypes from constants.js
 
 function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
   const [formData, setFormData] = useState({
@@ -90,14 +91,11 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
               className="block w-full mt-1 p-2 border rounded-md"
             >
               <option value="">Select Object Type</option>
-              <option value="Figure">Figure</option>
-              <option value="Coin">Coin</option>
-              <option value="Ivory">Ivory</option>
-              <option value="Jewellery">Jewellery</option>
-              <option value="Sculpture">Sculpture</option>
-              <option value="Pottery">Pottery</option>
-              <option value="Postcard">Postcard</option>
-              <option value="Other">Other</option>
+              {objectTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
             </select>
           </div>
           <div>

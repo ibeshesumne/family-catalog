@@ -3,6 +3,7 @@ import { db } from "../firebase";
 import { ref, push } from "firebase/database"; // Push for Firebase-generated keys
 import { useAuth } from "./Auth/AuthContext"; // Access the current user
 import { Collapse } from "react-collapse";
+import { objectTypes } from "./constants"; // Import objectTypes
 
 const CreateForm = () => {
   const { currentUser } = useAuth();
@@ -11,7 +12,7 @@ const CreateForm = () => {
   const [formData, setFormData] = useState({
     object_title: "",
     object_type: "",
-    object_id: "", // Human-readable ID
+    object_id: "",
     title: "",
     description: "",
     createdByEmail: currentUser ? currentUser.email : "",
@@ -38,8 +39,8 @@ const CreateForm = () => {
 
     if (loading) return;
 
-    if (!formData.object_id.trim()) {
-      alert("Object ID is required.");
+    if (!formData.object_id.trim() || !formData.object_type.trim()) {
+      alert("Object ID and Object Type are required.");
       return;
     }
 
@@ -47,12 +48,12 @@ const CreateForm = () => {
 
     try {
       const recordsRef = ref(db, "objects");
-      await push(recordsRef, formData); // Push generates a unique Firebase key
+      await push(recordsRef, formData);
       alert("Record added successfully!");
       setFormData({
         object_title: "",
         object_type: "",
-        object_id: "", // Reset object_id
+        object_id: "",
         title: "",
         description: "",
         createdByEmail: currentUser ? currentUser.email : "",
@@ -90,13 +91,19 @@ const CreateForm = () => {
               value={formData.object_title}
               onChange={handleInputChange}
             />
-            <input
-              type="text"
+            <select
               name="object_type"
-              placeholder="Object Type"
               value={formData.object_type}
               onChange={handleInputChange}
-            />
+              required
+            >
+              <option value="">Select Object Type</option>
+              {objectTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
             <input
               type="text"
               name="title"

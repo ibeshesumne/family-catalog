@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { db } from "../firebase";
-import { ref, remove } from "firebase/database";
+import { db, storage } from "../firebase";
+import { ref as dbRef, remove, get } from "firebase/database";
+import { ref as storageRef, deleteObject } from "firebase/storage";
 import { useAuth } from "./Auth/AuthContext";
 
 function DeleteData() {
@@ -9,6 +10,17 @@ function DeleteData() {
 
   const handleIdChange = (e) => {
     setRecordId(e.target.value);
+  };
+
+  const deleteFiles = async (fileURLs) => {
+    for (const url of fileURLs) {
+      try {
+        const fileRef = storageRef(storage, url);
+        await deleteObject(fileRef);
+      } catch (error) {
+        console.error(`Error deleting file: ${url}`, error.message);
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -29,10 +41,27 @@ function DeleteData() {
       return;
     }
 
-    const recordRef = ref(db, `objects/${recordId}`); // Firebase key used to locate the record
+    const recordRef = dbRef(db, `objects/${recordId}`);
 
     try {
-      // Attempt to remove the record
+      // Fetch the record to get multimedia file URLs
+      const snapshot = await get(recordRef);
+      if (!snapshot.exists()) {
+        alert("Record not found.");
+        return;
+      }
+
+      const recordData = snapshot.val();
+
+      // Delete associated files from Firebase Storage
+      if (recordData.object_images) {
+        await deleteFiles(recordData.object_images);
+      }
+      if (recordData.object_audio) {
+        await deleteFiles(recordData.object_audio);
+      }
+
+      // Delete the record from the Realtime Database
       await remove(recordRef);
       alert("Record deleted successfully!");
       setRecordId(""); // Reset the input field

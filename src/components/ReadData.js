@@ -77,6 +77,23 @@ function ReadData() {
             <div><strong>Description:</strong> {selectedRecord.description}</div>
             <div><strong>Creation Date:</strong> {selectedRecord.creationDate}</div>
             <div><strong>Modified Date:</strong> {selectedRecord.modifiedDate}</div>
+
+            {/* Display Images */}
+            {selectedRecord.object_images && selectedRecord.object_images.length > 0 && (
+              <div>
+                <strong>Images:</strong>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  {selectedRecord.object_images.map((imageUrl, index) => (
+                    <img
+                      key={index}
+                      src={imageUrl}
+                      alt={`Object ${index + 1}`}
+                      className="w-full h-auto rounded-lg shadow"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex justify-between mt-6">
             <button

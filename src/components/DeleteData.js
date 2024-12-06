@@ -1,3 +1,10 @@
+import React, { useState } from 'react'; // Ensure useState is imported here
+import { ref as storageRef, deleteObject } from "firebase/storage";
+import { ref as dbRef, get, remove } from "firebase/database";
+
+// Import Firebase configuration
+import { storage, db } from "../firebase"; // Ensure these are exported in firebase.js
+
 function DeleteData({ onDeleteSuccess, onCancel }) {
   const [recordId, setRecordId] = useState("");
 

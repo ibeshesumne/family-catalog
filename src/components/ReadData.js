@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { ref, onValue, query, orderByChild, equalTo, get } from "firebase/database";
-import { useAuth } from "./Auth/AuthContext"; // Ensure correct path to AuthContext
+import { useAuth } from "./Auth/AuthContext";
 import { CSVLink } from "react-csv";
 
 function ReadData({ onSelectRecord, onDelete, onCreate }) {
@@ -78,17 +78,13 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
     }
   };
 
-  // CSV headers for exporting data
-  const headers = [
-    { label: "ID (Firebase Key)", key: "id" },
-    { label: "Object ID", key: "object_id" },
-    { label: "Object Title", key: "object_title" },
-    { label: "Object Type", key: "object_type" },
-    { label: "Title", key: "title" },
-    { label: "Description", key: "description" },
-    { label: "Creation Date", key: "creationDate" },
-    { label: "Modified Date", key: "modifiedDate" },
-  ];
+  // Dynamically create CSV headers
+  const headers = records.length > 0
+    ? Object.keys(records[0]).map((key) => ({
+        label: key.replace(/_/g, " ").toUpperCase(),
+        key: key,
+      }))
+    : [];
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -158,34 +154,53 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
             {filteredRecords.map((record) => (
               <li
                 key={record.id}
-                className="p-4 border border-gray-300 rounded flex justify-between items-center"
+                className="p-4 border border-gray-300 rounded flex flex-col space-y-2"
               >
-                {/* Record Thumbnail and Details */}
-                <div className="flex items-center space-x-4">
-                  {record.thumbnailUrl && (
-                    <img
-                      src={record.thumbnailUrl}
-                      alt="Thumbnail"
-                      className="w-16 h-16 object-cover rounded-md border border-gray-300"
-                    />
-                  )}
-                  <div>
-                    <strong>ID:</strong> {record.id} | <strong>Object ID:</strong> {record.object_id} |{" "}
-                    <strong>Title:</strong> {record.object_title} | <strong>Type:</strong> {record.object_type}
-                  </div>
-                </div>
+                {Object.entries(record).map(([key, value]) => {
+                  if (key === "thumbnailUrl") {
+                    return (
+                      <div key={key}>
+                        <strong>{key.replace(/_/g, " ").toUpperCase()}:</strong>
+                        <img
+                          src={value}
+                          alt="Thumbnail"
+                          className="w-16 h-16 object-cover rounded-md border border-gray-300 mt-2"
+                        />
+                      </div>
+                    );
+                  }
 
-                {/* Action Buttons */}
+                  if (key === "object_images" && Array.isArray(value)) {
+                    return (
+                      <div key={key}>
+                        <strong>{key.replace(/_/g, " ").toUpperCase()}:</strong>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          {value.map((imageUrl, index) => (
+                            <img
+                              key={index}
+                              src={imageUrl}
+                              alt={`Object ${index + 1}`}
+                              className="w-16 h-16 object-cover rounded-md border border-gray-300"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <p key={key}>
+                      <strong>{key.replace(/_/g, " ").toUpperCase()}:</strong> {value?.toString() || "N/A"}
+                    </p>
+                  );
+                })}
                 <div className="flex space-x-2">
-                  {/* Review Record Button */}
                   <button
                     onClick={() => onSelectRecord(record)} // Pass selected record to parent
                     className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
                   >
                     Review Record
                   </button>
-
-                  {/* Delete Record Button */}
                   <button
                     onClick={() => onDelete(record)} // Trigger delete action
                     className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"

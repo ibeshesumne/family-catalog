@@ -2,26 +2,11 @@ import React, { useState, useEffect } from "react";
 import { db, storage } from "../firebase";
 import { ref, update } from "firebase/database";
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { objectTypes } from "./constants";
 
 function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
-  const [formData, setFormData] = useState({
-    object_title: "",
-    object_type: "",
-    object_id: "",
-    title: "",
-    description: "",
-    createdByEmail: "",
-    creationDate: "",
-    modifiedDate: "",
-    object_images: [],
-    object_audio: [],
-    thumbnailUrl: "", // Include thumbnailUrl in form data
-  });
-
+  const [formData, setFormData] = useState({});
   const [newImages, setNewImages] = useState([]);
-  // eslint-disable-next-line no-unused-vars
-  const [newAudio, setNewAudio] = useState([]); // Suppress warning for setNewAudio
+  const [newAudio, setNewAudio] = useState([]);
   const [imagesToDelete, setImagesToDelete] = useState([]);
 
   useEffect(() => {
@@ -103,7 +88,7 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
       if (newImages.length > 0) {
         const { urls: imageUrls, thumbnailUrl } = await uploadFiles(newImages, "images");
         updatedRecord.object_images = [...(formData.object_images || []), ...imageUrls];
-        updatedRecord.thumbnailUrl = thumbnailUrl || updatedRecord.thumbnailUrl; // Update thumbnail if new images are uploaded
+        updatedRecord.thumbnailUrl = thumbnailUrl || updatedRecord.thumbnailUrl;
       }
 
       if (newAudio.length > 0) {
@@ -121,70 +106,15 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
     }
   };
 
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-lg bg-white shadow-md rounded-lg p-8">
-        <h2 className="text-2xl font-bold text-center mb-6">Update Record</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Object ID</label>
-            <input
-              type="text"
-              name="object_id"
-              value={formData.object_id}
-              onChange={handleChange}
-              placeholder="Enter object ID"
-              className="block w-full mt-1 p-2 border rounded-md"
-              readOnly
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Object Title</label>
-            <input
-              type="text"
-              name="object_title"
-              value={formData.object_title}
-              onChange={handleChange}
-              placeholder="Enter object title"
-              className="block w-full mt-1 p-2 border rounded-md"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Thumbnail</label>
-            {formData.thumbnailUrl ? (
-              <img
-                src={formData.thumbnailUrl}
-                alt="Thumbnail"
-                className="w-24 h-24 object-cover rounded-md border border-gray-300"
-              />
-            ) : (
-              <div className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md">
-                No Thumbnail
-              </div>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Object Type</label>
-            <select
-              name="object_type"
-              value={formData.object_type}
-              onChange={handleChange}
-              className="block w-full mt-1 p-2 border rounded-md"
-            >
-              <option value="">Select Object Type</option>
-              {objectTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Existing Images */}
-          <div>
+  const renderInputFields = () => {
+    return Object.entries(formData).map(([key, value]) => {
+      if (key === "object_images") {
+        // Handle images
+        return (
+          <div key={key}>
             <label className="block text-sm font-medium text-gray-700">Existing Images</label>
             <div className="grid grid-cols-2 gap-4 mt-2">
-              {(formData.object_images || []).map((imageUrl, index) => (
+              {value.map((imageUrl, index) => (
                 <div key={index} className="relative">
                   <img
                     src={imageUrl}
@@ -201,11 +131,7 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Add New Images */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Add New Images</label>
+            <label className="block text-sm font-medium text-gray-700 mt-4">Add New Images</label>
             <input
               type="file"
               multiple
@@ -214,9 +140,13 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
               className="block w-full mt-1"
             />
           </div>
+        );
+      }
 
-          {/* Add New Audio */}
-          <div>
+      if (key === "object_audio") {
+        // Handle audio
+        return (
+          <div key={key}>
             <label className="block text-sm font-medium text-gray-700">Add New Audio</label>
             <input
               type="file"
@@ -226,11 +156,55 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
               className="block w-full mt-1"
             />
           </div>
+        );
+      }
 
+      if (key === "thumbnailUrl") {
+        // Handle thumbnail
+        return (
+          <div key={key}>
+            <label className="block text-sm font-medium text-gray-700">Thumbnail</label>
+            {value ? (
+              <img
+                src={value}
+                alt="Thumbnail"
+                className="w-24 h-24 object-cover rounded-md border border-gray-300"
+              />
+            ) : (
+              <div className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md">
+                No Thumbnail
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // Default input fields
+      return (
+        <div key={key}>
+          <label className="block text-sm font-medium text-gray-700">{key.replace(/_/g, " ").toUpperCase()}</label>
+          <input
+            type="text"
+            name={key}
+            value={value || ""}
+            onChange={handleChange}
+            className="block w-full mt-1 p-2 border rounded-md"
+          />
+        </div>
+      );
+    });
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-lg bg-white shadow-md rounded-lg p-8">
+        <h2 className="text-2xl font-bold text-center mb-6">Update Record</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {renderInputFields()}
           <div className="flex justify-between mt-4">
             <button
               type="button"
-              onClick={onCancel} // Correctly calls the onCancel prop
+              onClick={onCancel}
               className="w-1/2 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md mr-2"
             >
               Cancel

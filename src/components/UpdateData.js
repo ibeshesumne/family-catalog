@@ -69,12 +69,12 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectedRecord.id) {
+    if (!formData.object_id) {
       alert("Invalid record ID.");
       return;
     }
 
-    const recordRef = ref(db, `objects/${selectedRecord.id}`);
+    const recordRef = ref(db, `objects/${formData.object_id}`);
     const updatedRecord = { ...formData, modifiedDate: new Date().toISOString() };
 
     try {

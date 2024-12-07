@@ -16,8 +16,8 @@ const RecordManager = () => {
     const recordsRef = ref(db, "objects");
     const unsubscribe = onValue(recordsRef, (snapshot) => {
       if (snapshot.exists()) {
-        const fetchedRecords = Object.entries(snapshot.val()).map(([id, data]) => ({
-          id,
+        const fetchedRecords = Object.entries(snapshot.val()).map(([object_id, data]) => ({
+          object_id, // Use object_id as the key
           ...data,
         }));
         setRecords(fetchedRecords);

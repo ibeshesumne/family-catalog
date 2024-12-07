@@ -20,8 +20,11 @@ const Collection = () => {
     onValue(objectsRef, (snapshot) => {
       const data = snapshot.val();
 
-      // Load all objects into the state
-      const results = Object.keys(data || {}).map((key) => data[key]);
+      // Load all objects into the state, using object_id as the key
+      const results = Object.entries(data || {}).map(([key, value]) => ({
+        object_id: key,
+        ...value,
+      }));
       setObjects(results);
       setFilteredResults(results); // Initialize filtered results
     });

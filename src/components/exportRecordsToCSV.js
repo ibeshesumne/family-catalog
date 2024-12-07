@@ -24,11 +24,11 @@ function exportRecordsToCSV() {
     .then((snapshot) => {
       if (snapshot.exists()) {
         const records = snapshot.val();
-        const recordsArray = Object.keys(records).map((key) => {
-          const { object_images = [], object_audio = [], ...rest } = records[key];
+        const recordsArray = Object.entries(records).map(([object_id, data]) => {
+          const { object_images = [], object_audio = [], ...rest } = data;
           return {
-            id: key, // Firebase-generated key
-            ...rest, // Include all other fields
+            object_id, // Use object_id as the key
+            ...rest,
             object_images: object_images.join("; "), // Combine image URLs into a single string
             object_audio: object_audio.join("; "), // Combine audio URLs into a single string
           };

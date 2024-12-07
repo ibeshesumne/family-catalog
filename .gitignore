@@ -31,3 +31,5 @@ yarn-error.log*
 .env.production.local
 .DS_Store
 
+# Firebase Admin SDK Service Account Key
+family-catalog-firebase-adminsdk-r4r0r-78bf8453d7.json

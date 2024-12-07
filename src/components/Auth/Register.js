@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
-import { ref, set } from 'firebase/database';
+import { ref, get, set } from 'firebase/database';
 import { auth, db } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,17 +17,31 @@ const Register = () => {
     setError('');
 
     try {
+      // Check if the email is in the whitelist
+      const whitelistRef = ref(db, `whitelistedEmails/${btoa(email)}`);
+      const whitelistSnapshot = await get(whitelistRef);
+
+      if (!whitelistSnapshot.exists()) {
+        setError('Registration failed: Your email is not on the whitelist. Please contact the administrator.');
+        setLoading(false);
+        return;
+      }
+
+      // Proceed with registration if email is whitelisted
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
 
+      // Store user details in the database
       await set(ref(db, `users/${userId}`), {
         email,
         userType: 'regular',
       });
 
+      // Send email verification
       await sendEmailVerification(auth.currentUser);
       alert('Registration successful! A verification email has been sent. Please verify your email before logging in.');
 
+      // Redirect to the login page
       navigate('/login');
     } catch (error) {
       setError('Registration failed: ' + error.message);

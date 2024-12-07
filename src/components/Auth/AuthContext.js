@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, getAuth } from "firebase/auth";
+import { onAuthStateChanged, getAuth, signOut } from "firebase/auth";
 import { ref, get } from "firebase/database";
 import { db } from "../../firebase"; // Adjust the path to your firebase.js
 
@@ -19,11 +19,25 @@ export const AuthProvider = ({ children }) => {
     // Subscribe to auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setCurrentUser(user);
         setEmailVerified(user.emailVerified);
 
         try {
-          // Fetch the userType from the Realtime Database
+          // Check if the user's email exists in the whitelist
+          const whitelistRef = ref(db, `whitelistedEmails/${btoa(user.email)}`);
+          const whitelistSnapshot = await get(whitelistRef);
+
+          if (!whitelistSnapshot.exists()) {
+            console.warn(`User ${user.email} is not whitelisted. Signing out.`);
+            alert("Your email is not whitelisted. Please contact the administrator.");
+            await signOut(auth); // Log out the user
+            setCurrentUser(null);
+            setLoading(false);
+            return;
+          }
+
+          // If whitelisted, proceed with fetching additional user data
+          setCurrentUser(user);
+
           const userRef = ref(db, `users/${user.uid}/userType`);
           const snapshot = await get(userRef);
 
@@ -34,8 +48,9 @@ export const AuthProvider = ({ children }) => {
             setUserType("regular"); // Default to 'regular' if no userType exists
           }
         } catch (error) {
-          console.error("Error fetching userType:", error.message);
-          setUserType("regular"); // Fallback to 'regular' on error
+          console.error("Error during authentication check:", error.message);
+          setCurrentUser(null);
+          setUserType("regular");
         }
       } else {
         // Reset states when user logs out

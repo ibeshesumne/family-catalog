@@ -9,12 +9,14 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [info, setInfo] = useState(''); // Info message for unwhitelisted users
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setInfo('');
 
     try {
       // Check if the email is in the whitelist
@@ -22,9 +24,15 @@ const Register = () => {
       const whitelistSnapshot = await get(whitelistRef);
 
       if (!whitelistSnapshot.exists()) {
-        setError('Registration failed: Your email is not on the whitelist. Please contact the administrator.');
+        // Log the unwhitelisted user's request
+        const pendingRef = ref(db, `pendingRequests/${btoa(email)}`);
+        await set(pendingRef, { email, requestedAt: Date.now() });
+
+        setInfo(
+          'Your email is not on the whitelist. A request has been sent to the administrator for approval.'
+        );
         setLoading(false);
-        return;
+        return; // Exit the registration process
       }
 
       // Proceed with registration if email is whitelisted
@@ -54,10 +62,11 @@ const Register = () => {
     <div className="max-w-md mx-auto p-5 bg-white shadow-lg rounded-lg">
       <h2 className="text-2xl font-bold mb-4">Register</h2>
       <p className="text-gray-600 mb-4">
-        Please enter your email and password to create an account. After registering, you’ll receive a verification email. Make sure to verify your email before logging in.
+        Please enter your email and password to create an account. If your email is not on the whitelist, a request will be sent to the administrator for approval.
       </p>
       <form onSubmit={handleRegister} className="space-y-4">
         {error && <p className="text-red-500">{error}</p>}
+        {info && <p className="text-green-500">{info}</p>}
         <div>
           <label className="block text-gray-700 font-medium mb-1">Email:</label>
           <input

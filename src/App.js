@@ -13,6 +13,7 @@ import Collection from "./components/Collection"; // Import Collection Component
 import ObjectDetail from "./components/ObjectDetail"; // Import ObjectDetail Component
 import CreatePage from "./components/CreateData"; // Import the CreatePage component
 import ResultsPage from "./components/ResultsPage"; // Import ResultsPage Component
+import AdminDashboard from './components/Admin/AdminDashboard'; // Import Admin Dashboard
 
 function App() {
   return (
@@ -63,6 +64,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Logout />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
               </ProtectedRoute>
             }
           />

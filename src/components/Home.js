@@ -1,27 +1,21 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "./Auth/AuthContext";
-import SearchBox from "./SearchBox"; // Import the search box component
-import ReadData from "./ReadData"; // Import the search functionality
+import SearchBox from "./SearchBox";
 
 const Home = () => {
-  const { isLoggedIn } = useAuth(); // Use the isLoggedIn property
-  const [results, setResults] = useState([]); // State to store search results
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSearch = async (query) => {
-    try {
-      const data = await ReadData(query); // Fetch search results
-      setResults(data);
-    } catch (error) {
-      console.error("Error fetching search results:", error);
+  const handleSearch = (query) => {
+    if (query.trim()) {
+      navigate(`/results?q=${encodeURIComponent(query)}`); // Redirect to results
     }
   };
 
   return (
     <div style={{ textAlign: "center", padding: "40px 20px" }}>
-      <h1 style={{ fontSize: "2.5rem", marginBottom: "20px" }}>
-        Welcome to the Catalog
-      </h1>
+      <h1 style={{ fontSize: "2.5rem", marginBottom: "20px" }}>Welcome to the Catalog</h1>
       <p
         style={{
           fontSize: "1.2rem",
@@ -36,8 +30,7 @@ const Home = () => {
       {!isLoggedIn ? (
         <div>
           <p style={{ fontSize: "1rem", marginBottom: "20px" }}>
-            Please login or register to access the features. Use the navigation
-            bar above to proceed.
+            Please login or register to access the features. Use the navigation bar above to proceed.
           </p>
           <div>
             <Link
@@ -65,23 +58,7 @@ const Home = () => {
           </div>
         </div>
       ) : (
-        <>
-          <SearchBox onSearch={handleSearch} />
-          <div>
-            {results.length > 0 ? (
-              <ul>
-                {results.map((item, index) => (
-                  <li key={index}>
-                    <strong>Title:</strong> {item.title} | <strong>Place:</strong>{" "}
-                    {item.place} | <strong>ID:</strong> {item.object_id}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No results found</p>
-            )}
-          </div>
-        </>
+        <SearchBox onSearch={handleSearch} />
       )}
     </div>
   );

@@ -8,7 +8,12 @@ import { objectTypes } from "./constants";
 
 const CreateData = ({ onCancel }) => {
   const { currentUser } = useAuth();
-  const [openSections, setOpenSections] = useState({ general: true, multimedia: false });
+  const [openSections, setOpenSections] = useState({
+    general: true,
+    productionDetails: false,
+    multimedia: false,
+  });
+
   const [formData, setFormData] = useState({
     object_title: "",
     object_type: "",
@@ -20,6 +25,12 @@ const CreateData = ({ onCancel }) => {
     modifiedDate: new Date().toISOString(),
     object_images: [],
     object_audio: [],
+    production_ethnic_group: "",
+    culture_period: "",
+    producer_name: "",
+    school_style: "",
+    production_date: "",
+    production_place: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -48,18 +59,14 @@ const CreateData = ({ onCancel }) => {
       const storagePath = `${folder}/${file.name}`;
       const fileRef = storageRef(storage, storagePath);
 
-      // Upload the file
       await uploadBytes(fileRef, file);
 
-      // Get the file's download URL
       const fileURL = await getDownloadURL(fileRef);
 
-      // Set the first file's URL as the thumbnail
       if (!thumbnailUrl) {
         thumbnailUrl = fileURL;
       }
 
-      // Add the URL to the list of uploaded file URLs
       urls.push(fileURL);
     }
 
@@ -79,21 +86,17 @@ const CreateData = ({ onCancel }) => {
     setLoading(true);
 
     try {
-      // Upload images and generate their URLs and a thumbnail URL
       const { urls: imagesURLs, thumbnailUrl } = await uploadFiles(formData.object_images, "images");
 
-      // Upload audio files
       const audioURLs = await uploadFiles(formData.object_audio, "audio");
 
-      // Prepare the updated form data
       const updatedFormData = {
         ...formData,
         object_images: imagesURLs,
         object_audio: audioURLs,
-        thumbnailUrl: thumbnailUrl || null, // Add the thumbnail URL to the record
+        thumbnailUrl: thumbnailUrl || null,
       };
 
-      // Push the record to Firebase
       const recordRef = dbRef(db, `objects/${formData.object_id}`);
       await set(recordRef, updatedFormData);
 
@@ -109,9 +112,14 @@ const CreateData = ({ onCancel }) => {
         modifiedDate: new Date().toISOString(),
         object_images: [],
         object_audio: [],
+        production_ethnic_group: "",
+        culture_period: "",
+        producer_name: "",
+        school_style: "",
+        production_date: "",
+        production_place: "",
       });
 
-      // Navigate back to RecordManager
       if (onCancel) onCancel();
     } catch (error) {
       console.error("Error adding record:", error);
@@ -178,6 +186,68 @@ const CreateData = ({ onCancel }) => {
               name="description"
               placeholder="Description"
               value={formData.description}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+        </Collapse>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={() => toggleSection("productionDetails")}
+          className="mb-4 bg-gray-200 p-2 rounded hover:bg-gray-300"
+        >
+          Production Details
+        </button>
+        <Collapse isOpened={openSections.productionDetails}>
+          <div className="space-y-4">
+            <input
+              type="text"
+              name="production_ethnic_group"
+              placeholder="Production Ethnic Group"
+              value={formData.production_ethnic_group}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="culture_period"
+              placeholder="Culture Period"
+              value={formData.culture_period}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="producer_name"
+              placeholder="Producer Name"
+              value={formData.producer_name}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="school_style"
+              placeholder="School Style"
+              value={formData.school_style}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="production_date"
+              placeholder="Production Date"
+              value={formData.production_date}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="production_place"
+              placeholder="Production Place"
+              value={formData.production_place}
               onChange={handleInputChange}
               className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />

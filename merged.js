@@ -228,83 +228,66 @@ export const useAuth = () => {
 
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link
+import { useNavigate, Link } from 'react-router-dom';
 import { auth } from '../../firebase';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // Use navigate for routing
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
       setError('');
-      navigate('/search'); // Navigate to the protected route
+      navigate('/search');
     } catch (err) {
       setError('Invalid credentials. Please try again.');
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: 'auto', padding: '20px' }}>
-      <h2>Login</h2>
-      <p>
+    <div className="max-w-md mx-auto p-5 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl font-bold mb-4">Login</h2>
+      <p className="text-gray-600 mb-4">
         Please login with your email and password. If you don't have an account,{' '}
-        <Link to="/register">register here</Link>.
+        <Link to="/register" className="text-blue-500 hover:underline">
+          register here
+        </Link>.
       </p>
-      <form onSubmit={handleLogin}>
-        <div style={{ marginBottom: '15px' }}>
-          <label>Email:</label>
+      <form onSubmit={handleLogin} className="space-y-4">
+        <div>
+          <label className="block text-gray-700 font-medium mb-1">Email:</label>
           <input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={{
-              width: '100%',
-              padding: '10px',
-              margin: '5px 0',
-              border: '1px solid #ccc',
-              borderRadius: '5px',
-            }}
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
-        <div style={{ marginBottom: '15px' }}>
-          <label>Password:</label>
+        <div>
+          <label className="block text-gray-700 font-medium mb-1">Password:</label>
           <input
             type="password"
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{
-              width: '100%',
-              padding: '10px',
-              margin: '5px 0',
-              border: '1px solid #ccc',
-              borderRadius: '5px',
-            }}
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
         <button
           type="submit"
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#007BFF',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
+          className="w-full py-2 px-4 bg-blue-500 text-white font-bold rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           Login
         </button>
       </form>
-      {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
+      {error && <p className="text-red-500 mt-4">{error}</p>}
     </div>
   );
 };
@@ -361,7 +344,7 @@ const Logout = () => {
           <button
             onClick={handleLogout}
             disabled={isLoading}
-            className={`flex items-center justify-center w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ${
+            className={`flex items-center justify-center w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300 ${
               isLoading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
@@ -413,15 +396,15 @@ export default Logout;
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { ref, set } from 'firebase/database';
-import { auth, db } from '../../firebase'; // Import Firebase authentication and database
-import { useNavigate } from 'react-router-dom'; // Import navigation hook
+import { auth, db } from '../../firebase';
+import { useNavigate } from 'react-router-dom';
 
-function Register() {
+const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // Initialize navigation hook
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -429,26 +412,19 @@ function Register() {
     setError('');
 
     try {
-      // Create the user in Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
 
-      // Save user details in the Firebase Realtime Database with default userType 'regular'
       await set(ref(db, `users/${userId}`), {
         email,
-        userType: 'regular', // Default user type
+        userType: 'regular',
       });
 
-      // Send email verification
       await sendEmailVerification(auth.currentUser);
-      alert(
-        'Registration successful! A verification email has been sent. Please verify your email before logging in.'
-      );
+      alert('Registration successful! A verification email has been sent. Please verify your email before logging in.');
 
-      // Redirect to login page
       navigate('/login');
     } catch (error) {
-      console.error('Error during registration:', error);
       setError('Registration failed: ' + error.message);
     } finally {
       setLoading(false);
@@ -456,69 +432,48 @@ function Register() {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: 'auto', padding: '20px' }}>
-      <h2>Register</h2>
-      <p>
-        Please enter your email and password to create an account. After
-        registering, you’ll receive a verification email. Make sure to verify your
-        email before logging in.
+    <div className="max-w-md mx-auto p-5 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl font-bold mb-4">Register</h2>
+      <p className="text-gray-600 mb-4">
+        Please enter your email and password to create an account. After registering, you’ll receive a verification email. Make sure to verify your email before logging in.
       </p>
-      <form onSubmit={handleRegister}>
-        {error && (
-          <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>
-        )}
-        <div style={{ marginBottom: '15px' }}>
-          <label>Email:</label>
+      <form onSubmit={handleRegister} className="space-y-4">
+        {error && <p className="text-red-500">{error}</p>}
+        <div>
+          <label className="block text-gray-700 font-medium mb-1">Email:</label>
           <input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={{
-              width: '100%',
-              padding: '10px',
-              margin: '5px 0',
-              border: '1px solid #ccc',
-              borderRadius: '5px',
-            }}
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
-        <div style={{ marginBottom: '15px' }}>
-          <label>Password:</label>
+        <div>
+          <label className="block text-gray-700 font-medium mb-1">Password:</label>
           <input
             type="password"
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{
-              width: '100%',
-              padding: '10px',
-              margin: '5px 0',
-              border: '1px solid #ccc',
-              borderRadius: '5px',
-            }}
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#007BFF',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-          }}
+          className={`w-full py-2 px-4 text-white font-bold rounded focus:outline-none focus:ring-2 ${
+            loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700 focus:ring-blue-400'
+          }`}
         >
           {loading ? 'Registering...' : 'Register'}
         </button>
       </form>
     </div>
   );
-}
+};
 
 export default Register;
 
@@ -535,17 +490,17 @@ export default Register;
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { getDatabase, ref, onValue } from "firebase/database";
-import { objectTypes } from "./constants"; // Import the constants file
+import { objectTypes } from "./constants";
 
 const Collection = () => {
-  const [objects, setObjects] = useState([]); // All fetched objects
-  const [filteredResults, setFilteredResults] = useState([]); // Filtered results
+  const [objects, setObjects] = useState([]);
+  const [filteredResults, setFilteredResults] = useState([]);
   const [filters, setFilters] = useState({
     object_title: "",
     object_type: "",
     object_id: "",
     title: "",
-  }); // Filter criteria
+  });
 
   useEffect(() => {
     const db = getDatabase();
@@ -553,19 +508,16 @@ const Collection = () => {
 
     onValue(objectsRef, (snapshot) => {
       const data = snapshot.val();
-
-      // Load all objects into the state, using object_id as the key
       const results = Object.entries(data || {}).map(([key, value]) => ({
         object_id: key,
         ...value,
       }));
       setObjects(results);
-      setFilteredResults(results); // Initialize filtered results
+      setFilteredResults(results);
     });
   }, []);
 
   const applyFilters = useCallback(() => {
-    // Dynamically filter results based on all filter criteria
     setFilteredResults(
       objects.filter((obj) => {
         const matchesObjectTitle =
@@ -592,48 +544,28 @@ const Collection = () => {
     }));
   };
 
-  // Reapply filters whenever `filters` or `objects` change
   useEffect(() => {
     applyFilters();
   }, [applyFilters]);
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
+    <div className="flex min-h-screen">
       {/* Left Filter Panel */}
-      <aside
-        style={{
-          width: "25%",
-          backgroundColor: "#f8f9fa",
-          padding: "20px",
-          borderRight: "1px solid #ddd",
-        }}
-      >
-        <h2 style={{ fontSize: "1.5rem", marginBottom: "20px" }}>Filters</h2>
+      <aside className="w-1/4 bg-gray-100 p-4 border-r border-gray-300">
+        <h2 className="text-xl font-bold mb-4">Filters</h2>
         <input
           type="text"
           name="object_title"
           placeholder="Filter by Object Title"
           value={filters.object_title}
           onChange={handleFilterChange}
-          style={{
-            padding: "10px",
-            width: "100%",
-            marginBottom: "20px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-          }}
+          className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <select
           name="object_type"
           value={filters.object_type}
           onChange={handleFilterChange}
-          style={{
-            padding: "10px",
-            width: "100%",
-            marginBottom: "20px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-          }}
+          className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <option value="">All Object Types</option>
           {objectTypes.map((type) => (
@@ -648,13 +580,7 @@ const Collection = () => {
           placeholder="Filter by Object ID"
           value={filters.object_id}
           onChange={handleFilterChange}
-          style={{
-            padding: "10px",
-            width: "100%",
-            marginBottom: "20px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-          }}
+          className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <input
           type="text"
@@ -662,70 +588,38 @@ const Collection = () => {
           placeholder="Filter by Title"
           value={filters.title}
           onChange={handleFilterChange}
-          style={{
-            padding: "10px",
-            width: "100%",
-            marginBottom: "20px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-          }}
+          className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </aside>
 
       {/* Right Content Area */}
-      <main
-        style={{
-          width: "75%",
-          padding: "20px",
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: "20px",
-          overflowY: "auto",
-        }}
-      >
+      <main className="w-3/4 p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredResults.length > 0 ? (
           filteredResults.map((obj, index) => (
             <Link
               key={index}
               to={`/object/${obj.object_id}`}
-              style={{
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-                padding: "15px",
-                backgroundColor: "#fff",
-                textAlign: "center",
-                textDecoration: "none",
-                color: "inherit",
-              }}
+              className="block border border-gray-300 rounded p-4 bg-white shadow hover:shadow-lg transition"
             >
               <img
                 src={obj.thumbnailUrl || "default-thumbnail.jpg"}
                 alt={obj.title || "No Title"}
-                style={{
-                  width: "100%",
-                  height: "200px",
-                  objectFit: "cover",
-                  marginBottom: "10px",
-                }}
+                className="w-full h-48 object-cover rounded mb-4"
               />
-              <div style={{ textAlign: "left", margin: "10px 0" }}>
+              <div>
                 {obj.object_title && (
-                  <p style={{ fontSize: "1rem", fontWeight: "bold", margin: "0 0 5px 0" }}>
-                    {obj.object_title}
-                  </p>
+                  <p className="text-lg font-bold mb-1">{obj.object_title}</p>
                 )}
                 {obj.description && (
-                  <p style={{ fontSize: "0.9rem", margin: "0 0 5px 0", color: "#666" }}>
-                    {obj.description}
-                  </p>
+                  <p className="text-gray-600 text-sm mb-1">{obj.description}</p>
                 )}
                 {obj.object_id && (
-                  <p style={{ fontSize: "0.9rem", margin: "0 0 5px 0", color: "#999" }}>
+                  <p className="text-gray-500 text-xs">
                     <strong>ID:</strong> {obj.object_id}
                   </p>
                 )}
                 {obj.object_type && (
-                  <p style={{ fontSize: "0.9rem", margin: "0 0 5px 0", color: "#999" }}>
+                  <p className="text-gray-500 text-xs">
                     <strong>Type:</strong> {obj.object_type}
                   </p>
                 )}
@@ -733,7 +627,7 @@ const Collection = () => {
             </Link>
           ))
         ) : (
-          <p>No results found</p>
+          <p className="text-gray-500">No results found</p>
         )}
       </main>
     </div>
@@ -876,14 +770,19 @@ const CreateData = ({ onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-4 bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-bold mb-4">Create New Record</h2>
+    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md space-y-6">
+      <h2 className="text-2xl font-bold">Create New Record</h2>
+
       <div>
-        <button type="button" onClick={() => toggleSection("general")} className="mb-2 bg-gray-200 p-2 rounded">
+        <button
+          type="button"
+          onClick={() => toggleSection("general")}
+          className="mb-4 bg-gray-200 p-2 rounded hover:bg-gray-300"
+        >
           General Information
         </button>
         <Collapse isOpened={openSections.general}>
-          <div>
+          <div className="space-y-4">
             <input
               type="text"
               name="object_id"
@@ -891,7 +790,7 @@ const CreateData = ({ onCancel }) => {
               value={formData.object_id}
               onChange={handleInputChange}
               required
-              className="block w-full mb-2 p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
             <input
               type="text"
@@ -899,14 +798,14 @@ const CreateData = ({ onCancel }) => {
               placeholder="Object Title"
               value={formData.object_title}
               onChange={handleInputChange}
-              className="block w-full mb-2 p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
             <select
               name="object_type"
               value={formData.object_type}
               onChange={handleInputChange}
               required
-              className="block w-full mb-2 p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="">Select Object Type</option>
               {objectTypes.map((type) => (
@@ -921,46 +820,54 @@ const CreateData = ({ onCancel }) => {
               placeholder="Title"
               value={formData.title}
               onChange={handleInputChange}
-              className="block w-full mb-2 p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
             <textarea
               name="description"
               placeholder="Description"
               value={formData.description}
               onChange={handleInputChange}
-              className="block w-full mb-2 p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
         </Collapse>
       </div>
 
       <div>
-        <button type="button" onClick={() => toggleSection("multimedia")} className="mb-2 bg-gray-200 p-2 rounded">
+        <button
+          type="button"
+          onClick={() => toggleSection("multimedia")}
+          className="mb-4 bg-gray-200 p-2 rounded hover:bg-gray-300"
+        >
           Multimedia
         </button>
         <Collapse isOpened={openSections.multimedia}>
-          <div>
-            <label>Upload Images:</label>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => handleFileChange(e, "object_images")}
-              className="block w-full mb-2"
-            />
-            <label>Upload Audio:</label>
-            <input
-              type="file"
-              multiple
-              accept="audio/*"
-              onChange={(e) => handleFileChange(e, "object_audio")}
-              className="block w-full mb-2"
-            />
+          <div className="space-y-4">
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">Upload Images:</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => handleFileChange(e, "object_images")}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">Upload Audio:</label>
+              <input
+                type="file"
+                multiple
+                accept="audio/*"
+                onChange={(e) => handleFileChange(e, "object_audio")}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
           </div>
         </Collapse>
       </div>
 
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-between">
         <button
           type="button"
           onClick={onCancel}
@@ -992,12 +899,10 @@ export default CreateData;
 // BEGIN: components\DeleteData.js
 // ---------------------------------------------
 
-import React, { useState } from 'react'; // Ensure useState is imported here
+import React, { useState } from 'react';
 import { ref as storageRef, deleteObject } from "firebase/storage";
 import { ref as dbRef, get, remove } from "firebase/database";
-
-// Import Firebase configuration
-import { storage, db } from "../firebase"; // Ensure these are exported in firebase.js
+import { storage, db } from "../firebase";
 
 function DeleteData({ onDeleteSuccess, onCancel }) {
   const [recordId, setRecordId] = useState("");
@@ -1048,8 +953,8 @@ function DeleteData({ onDeleteSuccess, onCancel }) {
       // Delete the record from the Realtime Database
       await remove(recordRef);
       alert("Record deleted successfully!");
-      setRecordId(""); // Reset the input field
-      if (onDeleteSuccess) onDeleteSuccess(recordId); // Notify parent about the deletion
+      setRecordId("");
+      if (onDeleteSuccess) onDeleteSuccess(recordId);
     } catch (error) {
       console.error("Error deleting record:", error.message);
       alert("Error deleting record. Please try again.");
@@ -1060,9 +965,9 @@ function DeleteData({ onDeleteSuccess, onCancel }) {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-lg bg-white shadow-md rounded-lg p-8">
         <h2 className="text-2xl font-bold text-center mb-6">Delete Record</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="recordId" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="recordId" className="block text-sm font-medium text-gray-700 mb-2">
               Record ID
             </label>
             <input
@@ -1073,20 +978,20 @@ function DeleteData({ onDeleteSuccess, onCancel }) {
               onChange={handleIdChange}
               placeholder="Enter Record ID"
               required
-              className="block w-full mt-1 p-2 border rounded-md"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
             />
           </div>
-          <div className="flex justify-between mt-4">
+          <div className="flex justify-between">
             <button
               type="button"
-              onClick={onCancel} // Call cancel function
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md mr-2"
+              onClick={onCancel}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md"
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
             >
               Delete Record
             </button>
@@ -1117,28 +1022,28 @@ const Header = () => {
   const { currentUser } = useAuth();
 
   return (
-    <header className="bg-gray-800 text-white p-4">
+    <header className="bg-gray-800 text-white py-4">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-lg font-bold">Catalog App</h1>
+        <h1 className="text-xl font-bold">Catalog App</h1>
         <nav className="flex space-x-4">
           {/* Public Links */}
-          <Link to="/" className="hover:underline">
+          <Link to="/" className="hover:underline text-sm">
             Home
           </Link>
-          <Link to="/search" className="hover:underline">
+          <Link to="/search" className="hover:underline text-sm">
             Search
           </Link>
-          <Link to="/collection" className="hover:underline">
+          <Link to="/collection" className="hover:underline text-sm">
             Collection
           </Link>
 
           {/* Authenticated Links */}
           {currentUser && (
             <>
-              <Link to="/records" className="hover:underline">
+              <Link to="/records" className="hover:underline text-sm">
                 Manage Records
               </Link>
-              <Link to="/logout" className="hover:underline">
+              <Link to="/logout" className="hover:underline text-sm">
                 Logout
               </Link>
             </>
@@ -1147,10 +1052,10 @@ const Header = () => {
           {/* Unauthenticated Links */}
           {!currentUser && (
             <>
-              <Link to="/login" className="hover:underline">
+              <Link to="/login" className="hover:underline text-sm">
                 Login
               </Link>
-              <Link to="/register" className="hover:underline">
+              <Link to="/register" className="hover:underline text-sm">
                 Register
               </Link>
             </>
@@ -1189,44 +1094,26 @@ const Home = () => {
   };
 
   return (
-    <div style={{ textAlign: "center", padding: "40px 20px" }}>
-      <h1 style={{ fontSize: "2.5rem", marginBottom: "20px" }}>Welcome to the Catalog</h1>
-      <p
-        style={{
-          fontSize: "1.2rem",
-          marginBottom: "30px",
-          lineHeight: "1.6",
-          maxWidth: "800px",
-          margin: "0 auto",
-        }}
-      >
+    <div className="text-center py-10 px-5">
+      <h1 className="text-4xl font-extrabold mb-5">Welcome to the Catalog</h1>
+      <p className="text-lg text-gray-700 mb-8 leading-relaxed max-w-3xl mx-auto">
         Research data on a collection of objects.
       </p>
       {!isLoggedIn ? (
         <div>
-          <p style={{ fontSize: "1rem", marginBottom: "20px" }}>
+          <p className="text-base text-gray-600 mb-5">
             Please login or register to access the features. Use the navigation bar above to proceed.
           </p>
           <div>
             <Link
               to="/login"
-              style={{
-                margin: "0 15px",
-                color: "#007BFF",
-                textDecoration: "none",
-                fontSize: "1.2rem",
-              }}
+              className="mx-4 text-blue-500 hover:underline text-lg"
             >
               Login
             </Link>
             <Link
               to="/register"
-              style={{
-                margin: "0 15px",
-                color: "#007BFF",
-                textDecoration: "none",
-                fontSize: "1.2rem",
-              }}
+              className="mx-4 text-blue-500 hover:underline text-lg"
             >
               Register
             </Link>
@@ -1274,7 +1161,7 @@ const ObjectDetail = () => {
   }, [objectId]);
 
   if (!objectData) {
-    return <p>Loading...</p>;
+    return <p className="text-center text-gray-500">Loading...</p>;
   }
 
   const filteredFields = Object.entries(objectData || {}).filter(
@@ -1282,80 +1169,35 @@ const ObjectDetail = () => {
   );
 
   return (
-    <div
-      className="object-detail"
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        padding: "20px",
-        maxWidth: "1200px",
-        margin: "0 auto",
-        gap: "20px",
-      }}
-    >
+    <div className="flex flex-col md:flex-row p-6 max-w-6xl mx-auto gap-6">
       {/* Sidebar for Object Details */}
-      <aside
-        style={{
-          width: "30%",
-          backgroundColor: "#f8f9fa",
-          padding: "20px",
-          borderRadius: "8px",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-        }}
-      >
-        <h2 style={{ marginBottom: "20px", fontSize: "1.5rem", fontWeight: "bold" }}>
-          Object Details
-        </h2>
+      <aside className="w-full md:w-1/3 bg-gray-100 p-6 rounded-lg shadow">
+        <h2 className="mb-6 text-xl font-bold">Object Details</h2>
         {filteredFields.map(([key, value]) => (
-          <div key={key} style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "1rem", fontWeight: "bold", textTransform: "capitalize" }}>
+          <div key={key} className="mb-4">
+            <h3 className="text-sm font-bold capitalize text-gray-700">
               {key.replace(/_/g, " ")}:
             </h3>
-            <p style={{ fontSize: "0.9rem", margin: "5px 0" }}>{value}</p>
+            <p className="text-sm text-gray-600 mt-1">{value}</p>
           </div>
         ))}
       </aside>
 
       {/* Main Content Area */}
-      <main
-        style={{
-          width: "70%",
-          padding: "20px",
-          borderRadius: "8px",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-          textAlign: "center",
-        }}
-      >
+      <main className="w-full md:w-2/3 p-6 rounded-lg shadow text-center">
         {objectData.object_images && objectData.object_images.length > 0 ? (
           <img
             src={objectData.object_images[0]}
             alt={objectData.title || "Object Image"}
-            style={{
-              width: "100%",
-              maxHeight: "400px",
-              objectFit: "contain",
-              marginBottom: "20px",
-            }}
+            className="w-full max-h-96 object-contain mb-6 rounded"
           />
         ) : (
-          <p>No image available</p>
+          <p className="text-gray-500">No image available</p>
         )}
-        <h2
-          style={{
-            fontSize: "1.8rem",
-            fontWeight: "bold",
-            marginTop: "10px",
-          }}
-        >
+        <h2 className="text-2xl font-bold mt-4">
           {objectData.title || "Untitled"}
         </h2>
-        <p
-          style={{
-            fontSize: "1rem",
-            color: "#666",
-            marginTop: "10px",
-          }}
-        >
+        <p className="text-gray-600 mt-4">
           {objectData.description || "No description provided."}
         </p>
       </main>
@@ -1421,59 +1263,49 @@ import { useAuth } from "./Auth/AuthContext";
 import { CSVLink } from "react-csv";
 
 function ReadData({ onSelectRecord, onDelete, onCreate }) {
-  const [records, setRecords] = useState([]); // State to hold all records from Firebase
-  const [filteredRecords, setFilteredRecords] = useState([]); // State to hold search results
-  const [searchQuery, setSearchQuery] = useState(""); // State to manage the search input
-  const { currentUser, userType } = useAuth(); // Authentication context
+  const [records, setRecords] = useState([]);
+  const [filteredRecords, setFilteredRecords] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { currentUser, userType } = useAuth();
 
-  // Fetch records from Firebase Realtime Database
   useEffect(() => {
     if (!currentUser) return;
 
-    // Reference to "objects" node in the database
     const recordsRef = ref(db, "objects");
-
-    // Query for admin users or filtering by createdByEmail for non-admins
     const recordsQuery =
       userType === "admin"
         ? recordsRef
         : query(recordsRef, orderByChild("createdByEmail"), equalTo(currentUser.email));
 
-    // Subscribe to database changes
     const unsubscribe = onValue(recordsQuery, (snapshot) => {
       if (!snapshot.exists()) {
-        setRecords([]); // No records found
+        setRecords([]);
         setFilteredRecords([]);
         return;
       }
 
-      // Map the records to an array with the object_id as the key
       const allRecords = Object.entries(snapshot.val()).map(([object_id, data]) => ({
-        object_id, // Use object_id as the key
+        object_id,
         ...data,
       }));
 
-      setRecords(allRecords); // Update state with fetched records
-      setFilteredRecords(allRecords); // Initially show all records
+      setRecords(allRecords);
+      setFilteredRecords(allRecords);
     });
 
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, [currentUser, userType]);
 
-  // Handle search functionality
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
-      setFilteredRecords(records); // Show all records if search query is empty
+      setFilteredRecords(records);
       return;
     }
 
-    // Query records by object_id
     const objectIdQuery = query(ref(db, "objects"), orderByChild("object_id"), equalTo(searchQuery));
 
     try {
       const snapshot = await get(objectIdQuery);
-
-      // Process search results
       const results = [];
       if (snapshot.exists()) {
         snapshot.forEach((child) => {
@@ -1481,13 +1313,12 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
         });
       }
 
-      setFilteredRecords(results); // Update state with filtered records
+      setFilteredRecords(results);
     } catch (error) {
       console.error("Error fetching search results:", error);
     }
   };
 
-  // Dynamically create CSV headers
   const headers = records.length > 0
     ? Object.keys(records[0]).map((key) => ({
         label: key.replace(/_/g, " ").toUpperCase(),
@@ -1498,45 +1329,40 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-3xl bg-white shadow-md rounded-lg p-8">
-        {/* Header Section */}
         <h3 className="text-2xl font-bold mb-4">Your Records</h3>
         <p className="text-gray-600 mb-4">
           You have <strong>{records.length}</strong> records. Use the buttons below to create, review, update, or delete records.
           You can also export the data as a CSV file.
         </p>
 
-        {/* Search Section */}
-        <div className="mb-4">
+        <div className="mb-4 flex space-x-4">
           <input
             type="text"
             placeholder="Search by object ID"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="p-2 border rounded w-72"
+            className="p-2 border border-gray-300 rounded w-72 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
-          <button onClick={handleSearch} className="ml-4 p-2 bg-blue-500 text-white rounded">
+          <button onClick={handleSearch} className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700 focus:ring-2 focus:ring-blue-400">
             Search
           </button>
         </div>
 
-        {/* Create New Record Button */}
         <div className="mb-4">
-          <button onClick={onCreate} className="p-2 bg-green-500 text-white rounded">
+          <button onClick={onCreate} className="p-2 bg-green-500 text-white rounded hover:bg-green-700 focus:ring-2 focus:ring-green-400">
             Create New Record
           </button>
         </div>
 
-        {/* CSV Export Button */}
         <CSVLink
           data={records}
           headers={headers}
           filename="objects_records.csv"
-          className="p-2 bg-gray-500 text-white rounded mb-4 inline-block"
+          className="p-2 bg-gray-500 text-white rounded mb-4 inline-block hover:bg-gray-700 focus:ring-2 focus:ring-gray-400"
         >
           Export Records to CSV
         </CSVLink>
 
-        {/* Records Listing */}
         {filteredRecords.length === 0 ? (
           <p className="text-gray-500">No records available</p>
         ) : (
@@ -1549,12 +1375,12 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
                 {Object.entries(record).map(([key, value]) => {
                   if (key === "thumbnailUrl") {
                     return (
-                      <div key={key}>
+                      <div key={key} className="flex items-center space-x-2">
                         <strong>{key.replace(/_/g, " ").toUpperCase()}:</strong>
                         <img
                           src={value}
                           alt="Thumbnail"
-                          className="w-16 h-16 object-cover rounded-md border border-gray-300 mt-2"
+                          className="w-16 h-16 object-cover rounded-md border border-gray-300"
                         />
                       </div>
                     );
@@ -1562,7 +1388,7 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
 
                   if (key === "object_images" && Array.isArray(value)) {
                     return (
-                      <div key={key}>
+                      <div key={key} className="flex flex-col">
                         <strong>{key.replace(/_/g, " ").toUpperCase()}:</strong>
                         <div className="grid grid-cols-2 gap-2 mt-2">
                           {value.map((imageUrl, index) => (
@@ -1579,21 +1405,21 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
                   }
 
                   return (
-                    <p key={key}>
+                    <p key={key} className="text-sm">
                       <strong>{key.replace(/_/g, " ").toUpperCase()}:</strong> {value?.toString() || "N/A"}
                     </p>
                   );
                 })}
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 mt-2">
                   <button
                     onClick={() => onSelectRecord(record)}
-                    className="p-2 bg-yellow-500 text-white rounded"
+                    className="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-700 focus:ring-2 focus:ring-yellow-400"
                   >
                     Review Record
                   </button>
                   <button
                     onClick={() => onDelete(record)}
-                    className="p-2 bg-red-500 text-white rounded"
+                    className="p-2 bg-red-500 text-white rounded hover:bg-red-700 focus:ring-2 focus:ring-red-400"
                   >
                     Delete Record
                   </button>
@@ -1769,50 +1595,31 @@ const ResultsPage = () => {
   }, [applyFilters]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <div className="flex flex-col h-screen">
       {/* Top Section for Item Count */}
-      <div style={{ padding: "10px", backgroundColor: "#f4f4f4", textAlign: "left" }}>
-        <h2 style={{ margin: 0 }}>
+      <div className="p-4 bg-gray-100 text-left">
+        <h2 className="text-lg font-bold">
           Collection search: {filteredResults.length} results
         </h2>
       </div>
 
-      <div style={{ display: "flex", height: "calc(100% - 50px)" }}>
+      <div className="flex flex-1">
         {/* Left Filter Panel */}
-        <aside
-          style={{
-            width: "25%",
-            backgroundColor: "#f8f9fa",
-            padding: "20px",
-            borderRight: "1px solid #ddd",
-          }}
-        >
-          <h2 style={{ fontSize: "1.5rem", marginBottom: "20px" }}>Filters</h2>
+        <aside className="w-1/4 bg-gray-50 p-4 border-r border-gray-300">
+          <h2 className="text-xl font-bold mb-4">Filters</h2>
           <input
             type="text"
             name="object_title"
             placeholder="Filter by Object Title"
             value={filters.object_title}
             onChange={handleFilterChange}
-            style={{
-              padding: "10px",
-              width: "100%",
-              marginBottom: "20px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-            }}
+            className="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
           <select
             name="object_type"
             value={filters.object_type}
             onChange={handleFilterChange}
-            style={{
-              padding: "10px",
-              width: "100%",
-              marginBottom: "20px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-            }}
+            className="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">All Object Types</option>
             {objectTypes.map((type) => (
@@ -1827,13 +1634,7 @@ const ResultsPage = () => {
             placeholder="Filter by Object ID"
             value={filters.object_id}
             onChange={handleFilterChange}
-            style={{
-              padding: "10px",
-              width: "100%",
-              marginBottom: "20px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-            }}
+            className="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
           <input
             type="text"
@@ -1841,66 +1642,33 @@ const ResultsPage = () => {
             placeholder="Filter by Title"
             value={filters.title}
             onChange={handleFilterChange}
-            style={{
-              padding: "10px",
-              width: "100%",
-              marginBottom: "20px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-            }}
+            className="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </aside>
 
         {/* Right Content Area */}
-        <main
-          style={{
-            width: "75%",
-            padding: "20px",
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)", // Maximum of 3 objects per row
-            gap: "20px",
-            overflowY: "auto",
-          }}
-        >
+        <main className="w-3/4 p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto">
           {filteredResults.length > 0 ? (
             filteredResults.map((obj, index) => (
               <Link
                 key={index}
                 to={`/object/${obj.object_id}`} // Navigate to ObjectDetail page
-                style={{
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
-                  padding: "15px",
-                  backgroundColor: "#fff",
-                  textAlign: "center",
-                  boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-                  textDecoration: "none",
-                  color: "inherit",
-                }}
+                className="border border-gray-300 rounded p-4 bg-white shadow hover:shadow-lg transition"
               >
                 <img
                   src={obj.thumbnailUrl || "default-thumbnail.jpg"}
                   alt={obj.title || "No Title"}
-                  style={{
-                    width: "100%",
-                    height: "200px",
-                    objectFit: "cover",
-                    marginBottom: "10px",
-                  }}
+                  className="w-full h-48 object-cover rounded mb-4"
                 />
-                <div style={{ textAlign: "left", margin: "10px 0" }}>
+                <div>
                   {obj.object_title && (
-                    <p style={{ fontSize: "1rem", fontWeight: "bold", margin: "0 0 5px 0" }}>
-                      {obj.object_title}
-                    </p>
+                    <p className="text-lg font-bold mb-1">{obj.object_title}</p>
                   )}
                   {obj.description && (
-                    <p style={{ fontSize: "0.9rem", margin: "0 0 5px 0", color: "#666" }}>
-                      {obj.description}
-                    </p>
+                    <p className="text-gray-600 text-sm mb-1">{obj.description}</p>
                   )}
                   {obj.object_id && (
-                    <p style={{ fontSize: "0.9rem", margin: "0 0 5px 0", color: "#999" }}>
+                    <p className="text-gray-500 text-xs">
                       <strong>ID:</strong> {obj.object_id}
                     </p>
                   )}
@@ -1908,7 +1676,7 @@ const ResultsPage = () => {
               </Link>
             ))
           ) : (
-            <p>No results found</p>
+            <p className="text-gray-500">No results found</p>
           )}
         </main>
       </div>
@@ -1983,7 +1751,6 @@ export default SearchBox;
 // BEGIN: components\SearchPage.js
 // ---------------------------------------------
 
-// SearchPage.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -1991,43 +1758,36 @@ const SearchPage = () => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
-  const handleSearch = () => {
+  const handleSearch = (e) => {
+    e.preventDefault();
     if (query.trim()) {
-      navigate(`/results?q=${encodeURIComponent(query)}`); // Navigate to ResultsPage with query as URL parameter
+      navigate(`/results?q=${encodeURIComponent(query)}`);
     }
   };
 
   return (
-    <div style={{ textAlign: "center", padding: "40px 20px" }}>
-      <h1 style={{ fontSize: "2.5rem", marginBottom: "20px" }}>Search the Collection</h1>
-      <div>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Enter search terms..."
-          style={{
-            padding: "10px",
-            width: "60%",
-            marginRight: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-          }}
-        />
-        <button
-          onClick={handleSearch}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#007BFF",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
-        >
-          Search
-        </button>
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Search the Catalog</h1>
+      <form onSubmit={handleSearch} className="w-full max-w-md">
+        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+          <input
+            type="text"
+            placeholder="Enter search term"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-4 py-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            Search
+          </button>
+        </div>
+      </form>
+      <p className="text-sm text-gray-500 mt-4">
+        Use the search box above to find objects in the catalog.
+      </p>
     </div>
   );
 };
@@ -2103,7 +1863,7 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
       const fileURL = await getDownloadURL(fileRef);
 
       if (!thumbnailUrl) {
-        thumbnailUrl = fileURL; // Use the first uploaded image as the thumbnail
+        thumbnailUrl = fileURL;
       }
 
       urls.push(fileURL);
@@ -2124,13 +1884,11 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
     const updatedRecord = { ...formData, modifiedDate: new Date().toISOString() };
 
     try {
-      // Delete selected images
       for (const imageUrl of imagesToDelete) {
         const imageRef = storageRef(storage, imageUrl);
         await deleteObject(imageRef);
       }
 
-      // Upload new multimedia files
       if (newImages.length > 0) {
         const { urls: imageUrls, thumbnailUrl } = await uploadFiles(newImages, "images");
         updatedRecord.object_images = [...(formData.object_images || []), ...imageUrls];
@@ -2142,7 +1900,6 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
         updatedRecord.object_audio = [...(formData.object_audio || []), ...audioUrls];
       }
 
-      // Update the record in Firebase
       await update(recordRef, updatedRecord);
       alert("Record updated successfully!");
       if (onRecordUpdated) onRecordUpdated(updatedRecord);
@@ -2155,9 +1912,8 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
   const renderInputFields = () => {
     return Object.entries(formData).map(([key, value]) => {
       if (key === "object_images") {
-        // Handle images
         return (
-          <div key={key}>
+          <div key={key} className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Existing Images</label>
             <div className="grid grid-cols-2 gap-4 mt-2">
               {value.map((imageUrl, index) => (
@@ -2165,7 +1921,7 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
                   <img
                     src={imageUrl}
                     alt={`Object ${index + 1}`}
-                    className="w-full h-auto rounded-lg shadow"
+                    className="w-full h-auto rounded-lg shadow border"
                   />
                   <button
                     type="button"
@@ -2183,41 +1939,39 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
               multiple
               accept="image/*"
               onChange={(e) => handleFileChange(e, setNewImages)}
-              className="block w-full mt-1"
+              className="block w-full mt-1 p-2 border border-gray-300 rounded"
             />
           </div>
         );
       }
 
       if (key === "object_audio") {
-        // Handle audio
         return (
-          <div key={key}>
+          <div key={key} className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Add New Audio</label>
             <input
               type="file"
               multiple
               accept="audio/*"
               onChange={(e) => handleFileChange(e, setNewAudio)}
-              className="block w-full mt-1"
+              className="block w-full mt-1 p-2 border border-gray-300 rounded"
             />
           </div>
         );
       }
 
       if (key === "thumbnailUrl") {
-        // Handle thumbnail
         return (
-          <div key={key}>
+          <div key={key} className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Thumbnail</label>
             {value ? (
               <img
                 src={value}
                 alt="Thumbnail"
-                className="w-24 h-24 object-cover rounded-md border border-gray-300"
+                className="w-24 h-24 object-cover rounded-md border border-gray-300 mt-2"
               />
             ) : (
-              <div className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md">
+              <div className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md mt-2">
                 No Thumbnail
               </div>
             )}
@@ -2225,16 +1979,15 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
         );
       }
 
-      // Default input fields
       return (
-        <div key={key}>
+        <div key={key} className="mb-4">
           <label className="block text-sm font-medium text-gray-700">{key.replace(/_/g, " ").toUpperCase()}</label>
           <input
             type="text"
             name={key}
             value={value || ""}
             onChange={handleChange}
-            className="block w-full mt-1 p-2 border rounded-md"
+            className="block w-full mt-1 p-2 border border-gray-300 rounded"
           />
         </div>
       );
@@ -2245,7 +1998,7 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-lg bg-white shadow-md rounded-lg p-8">
         <h2 className="text-2xl font-bold text-center mb-6">Update Record</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {renderInputFields()}
           <div className="flex justify-between mt-4">
             <button

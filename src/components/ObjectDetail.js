@@ -29,7 +29,7 @@ const ObjectDetail = () => {
       value &&
       value !== "" &&
       ![
-        "createdByemail",
+        "createdByEmail",
         "creationDate",
         "modifiedDate",
         "object_images",

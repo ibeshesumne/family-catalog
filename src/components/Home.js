@@ -14,44 +14,26 @@ const Home = () => {
   };
 
   return (
-    <div style={{ textAlign: "center", padding: "40px 20px" }}>
-      <h1 style={{ fontSize: "2.5rem", marginBottom: "20px" }}>Welcome to the Catalog</h1>
-      <p
-        style={{
-          fontSize: "1.2rem",
-          marginBottom: "30px",
-          lineHeight: "1.6",
-          maxWidth: "800px",
-          margin: "0 auto",
-        }}
-      >
+    <div className="text-center py-10 px-5">
+      <h1 className="text-4xl font-extrabold mb-5">Welcome to the Catalog</h1>
+      <p className="text-lg text-gray-700 mb-8 leading-relaxed max-w-3xl mx-auto">
         Research data on a collection of objects.
       </p>
       {!isLoggedIn ? (
         <div>
-          <p style={{ fontSize: "1rem", marginBottom: "20px" }}>
+          <p className="text-base text-gray-600 mb-5">
             Please login or register to access the features. Use the navigation bar above to proceed.
           </p>
           <div>
             <Link
               to="/login"
-              style={{
-                margin: "0 15px",
-                color: "#007BFF",
-                textDecoration: "none",
-                fontSize: "1.2rem",
-              }}
+              className="mx-4 text-blue-500 hover:underline text-lg"
             >
               Login
             </Link>
             <Link
               to="/register"
-              style={{
-                margin: "0 15px",
-                color: "#007BFF",
-                textDecoration: "none",
-                fontSize: "1.2rem",
-              }}
+              className="mx-4 text-blue-500 hover:underline text-lg"
             >
               Register
             </Link>

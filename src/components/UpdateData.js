@@ -57,7 +57,7 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
       const fileURL = await getDownloadURL(fileRef);
 
       if (!thumbnailUrl) {
-        thumbnailUrl = fileURL; // Use the first uploaded image as the thumbnail
+        thumbnailUrl = fileURL;
       }
 
       urls.push(fileURL);
@@ -78,13 +78,11 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
     const updatedRecord = { ...formData, modifiedDate: new Date().toISOString() };
 
     try {
-      // Delete selected images
       for (const imageUrl of imagesToDelete) {
         const imageRef = storageRef(storage, imageUrl);
         await deleteObject(imageRef);
       }
 
-      // Upload new multimedia files
       if (newImages.length > 0) {
         const { urls: imageUrls, thumbnailUrl } = await uploadFiles(newImages, "images");
         updatedRecord.object_images = [...(formData.object_images || []), ...imageUrls];
@@ -96,7 +94,6 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
         updatedRecord.object_audio = [...(formData.object_audio || []), ...audioUrls];
       }
 
-      // Update the record in Firebase
       await update(recordRef, updatedRecord);
       alert("Record updated successfully!");
       if (onRecordUpdated) onRecordUpdated(updatedRecord);
@@ -109,9 +106,8 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
   const renderInputFields = () => {
     return Object.entries(formData).map(([key, value]) => {
       if (key === "object_images") {
-        // Handle images
         return (
-          <div key={key}>
+          <div key={key} className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Existing Images</label>
             <div className="grid grid-cols-2 gap-4 mt-2">
               {value.map((imageUrl, index) => (
@@ -119,7 +115,7 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
                   <img
                     src={imageUrl}
                     alt={`Object ${index + 1}`}
-                    className="w-full h-auto rounded-lg shadow"
+                    className="w-full h-auto rounded-lg shadow border"
                   />
                   <button
                     type="button"
@@ -137,41 +133,39 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
               multiple
               accept="image/*"
               onChange={(e) => handleFileChange(e, setNewImages)}
-              className="block w-full mt-1"
+              className="block w-full mt-1 p-2 border border-gray-300 rounded"
             />
           </div>
         );
       }
 
       if (key === "object_audio") {
-        // Handle audio
         return (
-          <div key={key}>
+          <div key={key} className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Add New Audio</label>
             <input
               type="file"
               multiple
               accept="audio/*"
               onChange={(e) => handleFileChange(e, setNewAudio)}
-              className="block w-full mt-1"
+              className="block w-full mt-1 p-2 border border-gray-300 rounded"
             />
           </div>
         );
       }
 
       if (key === "thumbnailUrl") {
-        // Handle thumbnail
         return (
-          <div key={key}>
+          <div key={key} className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Thumbnail</label>
             {value ? (
               <img
                 src={value}
                 alt="Thumbnail"
-                className="w-24 h-24 object-cover rounded-md border border-gray-300"
+                className="w-24 h-24 object-cover rounded-md border border-gray-300 mt-2"
               />
             ) : (
-              <div className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md">
+              <div className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md mt-2">
                 No Thumbnail
               </div>
             )}
@@ -179,16 +173,15 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
         );
       }
 
-      // Default input fields
       return (
-        <div key={key}>
+        <div key={key} className="mb-4">
           <label className="block text-sm font-medium text-gray-700">{key.replace(/_/g, " ").toUpperCase()}</label>
           <input
             type="text"
             name={key}
             value={value || ""}
             onChange={handleChange}
-            className="block w-full mt-1 p-2 border rounded-md"
+            className="block w-full mt-1 p-2 border border-gray-300 rounded"
           />
         </div>
       );
@@ -199,7 +192,7 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-lg bg-white shadow-md rounded-lg p-8">
         <h2 className="text-2xl font-bold text-center mb-6">Update Record</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {renderInputFields()}
           <div className="flex justify-between mt-4">
             <button

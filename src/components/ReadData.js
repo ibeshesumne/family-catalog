@@ -5,59 +5,49 @@ import { useAuth } from "./Auth/AuthContext";
 import { CSVLink } from "react-csv";
 
 function ReadData({ onSelectRecord, onDelete, onCreate }) {
-  const [records, setRecords] = useState([]); // State to hold all records from Firebase
-  const [filteredRecords, setFilteredRecords] = useState([]); // State to hold search results
-  const [searchQuery, setSearchQuery] = useState(""); // State to manage the search input
-  const { currentUser, userType } = useAuth(); // Authentication context
+  const [records, setRecords] = useState([]);
+  const [filteredRecords, setFilteredRecords] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { currentUser, userType } = useAuth();
 
-  // Fetch records from Firebase Realtime Database
   useEffect(() => {
     if (!currentUser) return;
 
-    // Reference to "objects" node in the database
     const recordsRef = ref(db, "objects");
-
-    // Query for admin users or filtering by createdByEmail for non-admins
     const recordsQuery =
       userType === "admin"
         ? recordsRef
         : query(recordsRef, orderByChild("createdByEmail"), equalTo(currentUser.email));
 
-    // Subscribe to database changes
     const unsubscribe = onValue(recordsQuery, (snapshot) => {
       if (!snapshot.exists()) {
-        setRecords([]); // No records found
+        setRecords([]);
         setFilteredRecords([]);
         return;
       }
 
-      // Map the records to an array with the object_id as the key
       const allRecords = Object.entries(snapshot.val()).map(([object_id, data]) => ({
-        object_id, // Use object_id as the key
+        object_id,
         ...data,
       }));
 
-      setRecords(allRecords); // Update state with fetched records
-      setFilteredRecords(allRecords); // Initially show all records
+      setRecords(allRecords);
+      setFilteredRecords(allRecords);
     });
 
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, [currentUser, userType]);
 
-  // Handle search functionality
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
-      setFilteredRecords(records); // Show all records if search query is empty
+      setFilteredRecords(records);
       return;
     }
 
-    // Query records by object_id
     const objectIdQuery = query(ref(db, "objects"), orderByChild("object_id"), equalTo(searchQuery));
 
     try {
       const snapshot = await get(objectIdQuery);
-
-      // Process search results
       const results = [];
       if (snapshot.exists()) {
         snapshot.forEach((child) => {
@@ -65,13 +55,12 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
         });
       }
 
-      setFilteredRecords(results); // Update state with filtered records
+      setFilteredRecords(results);
     } catch (error) {
       console.error("Error fetching search results:", error);
     }
   };
 
-  // Dynamically create CSV headers
   const headers = records.length > 0
     ? Object.keys(records[0]).map((key) => ({
         label: key.replace(/_/g, " ").toUpperCase(),
@@ -82,45 +71,40 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-3xl bg-white shadow-md rounded-lg p-8">
-        {/* Header Section */}
         <h3 className="text-2xl font-bold mb-4">Your Records</h3>
         <p className="text-gray-600 mb-4">
           You have <strong>{records.length}</strong> records. Use the buttons below to create, review, update, or delete records.
           You can also export the data as a CSV file.
         </p>
 
-        {/* Search Section */}
-        <div className="mb-4">
+        <div className="mb-4 flex space-x-4">
           <input
             type="text"
             placeholder="Search by object ID"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="p-2 border rounded w-72"
+            className="p-2 border border-gray-300 rounded w-72 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
-          <button onClick={handleSearch} className="ml-4 p-2 bg-blue-500 text-white rounded">
+          <button onClick={handleSearch} className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700 focus:ring-2 focus:ring-blue-400">
             Search
           </button>
         </div>
 
-        {/* Create New Record Button */}
         <div className="mb-4">
-          <button onClick={onCreate} className="p-2 bg-green-500 text-white rounded">
+          <button onClick={onCreate} className="p-2 bg-green-500 text-white rounded hover:bg-green-700 focus:ring-2 focus:ring-green-400">
             Create New Record
           </button>
         </div>
 
-        {/* CSV Export Button */}
         <CSVLink
           data={records}
           headers={headers}
           filename="objects_records.csv"
-          className="p-2 bg-gray-500 text-white rounded mb-4 inline-block"
+          className="p-2 bg-gray-500 text-white rounded mb-4 inline-block hover:bg-gray-700 focus:ring-2 focus:ring-gray-400"
         >
           Export Records to CSV
         </CSVLink>
 
-        {/* Records Listing */}
         {filteredRecords.length === 0 ? (
           <p className="text-gray-500">No records available</p>
         ) : (
@@ -133,12 +117,12 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
                 {Object.entries(record).map(([key, value]) => {
                   if (key === "thumbnailUrl") {
                     return (
-                      <div key={key}>
+                      <div key={key} className="flex items-center space-x-2">
                         <strong>{key.replace(/_/g, " ").toUpperCase()}:</strong>
                         <img
                           src={value}
                           alt="Thumbnail"
-                          className="w-16 h-16 object-cover rounded-md border border-gray-300 mt-2"
+                          className="w-16 h-16 object-cover rounded-md border border-gray-300"
                         />
                       </div>
                     );
@@ -146,7 +130,7 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
 
                   if (key === "object_images" && Array.isArray(value)) {
                     return (
-                      <div key={key}>
+                      <div key={key} className="flex flex-col">
                         <strong>{key.replace(/_/g, " ").toUpperCase()}:</strong>
                         <div className="grid grid-cols-2 gap-2 mt-2">
                           {value.map((imageUrl, index) => (
@@ -163,21 +147,21 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
                   }
 
                   return (
-                    <p key={key}>
+                    <p key={key} className="text-sm">
                       <strong>{key.replace(/_/g, " ").toUpperCase()}:</strong> {value?.toString() || "N/A"}
                     </p>
                   );
                 })}
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 mt-2">
                   <button
                     onClick={() => onSelectRecord(record)}
-                    className="p-2 bg-yellow-500 text-white rounded"
+                    className="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-700 focus:ring-2 focus:ring-yellow-400"
                   >
                     Review Record
                   </button>
                   <button
                     onClick={() => onDelete(record)}
-                    className="p-2 bg-red-500 text-white rounded"
+                    className="p-2 bg-red-500 text-white rounded hover:bg-red-700 focus:ring-2 focus:ring-red-400"
                   >
                     Delete Record
                   </button>

@@ -38,7 +38,7 @@ const Logout = () => {
           <button
             onClick={handleLogout}
             disabled={isLoading}
-            className={`flex items-center justify-center w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ${
+            className={`flex items-center justify-center w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300 ${
               isLoading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >

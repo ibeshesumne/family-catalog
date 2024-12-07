@@ -60,50 +60,31 @@ const ResultsPage = () => {
   }, [applyFilters]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <div className="flex flex-col h-screen">
       {/* Top Section for Item Count */}
-      <div style={{ padding: "10px", backgroundColor: "#f4f4f4", textAlign: "left" }}>
-        <h2 style={{ margin: 0 }}>
+      <div className="p-4 bg-gray-100 text-left">
+        <h2 className="text-lg font-bold">
           Collection search: {filteredResults.length} results
         </h2>
       </div>
 
-      <div style={{ display: "flex", height: "calc(100% - 50px)" }}>
+      <div className="flex flex-1">
         {/* Left Filter Panel */}
-        <aside
-          style={{
-            width: "25%",
-            backgroundColor: "#f8f9fa",
-            padding: "20px",
-            borderRight: "1px solid #ddd",
-          }}
-        >
-          <h2 style={{ fontSize: "1.5rem", marginBottom: "20px" }}>Filters</h2>
+        <aside className="w-1/4 bg-gray-50 p-4 border-r border-gray-300">
+          <h2 className="text-xl font-bold mb-4">Filters</h2>
           <input
             type="text"
             name="object_title"
             placeholder="Filter by Object Title"
             value={filters.object_title}
             onChange={handleFilterChange}
-            style={{
-              padding: "10px",
-              width: "100%",
-              marginBottom: "20px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-            }}
+            className="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
           <select
             name="object_type"
             value={filters.object_type}
             onChange={handleFilterChange}
-            style={{
-              padding: "10px",
-              width: "100%",
-              marginBottom: "20px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-            }}
+            className="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">All Object Types</option>
             {objectTypes.map((type) => (
@@ -118,13 +99,7 @@ const ResultsPage = () => {
             placeholder="Filter by Object ID"
             value={filters.object_id}
             onChange={handleFilterChange}
-            style={{
-              padding: "10px",
-              width: "100%",
-              marginBottom: "20px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-            }}
+            className="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
           <input
             type="text"
@@ -132,66 +107,33 @@ const ResultsPage = () => {
             placeholder="Filter by Title"
             value={filters.title}
             onChange={handleFilterChange}
-            style={{
-              padding: "10px",
-              width: "100%",
-              marginBottom: "20px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-            }}
+            className="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </aside>
 
         {/* Right Content Area */}
-        <main
-          style={{
-            width: "75%",
-            padding: "20px",
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)", // Maximum of 3 objects per row
-            gap: "20px",
-            overflowY: "auto",
-          }}
-        >
+        <main className="w-3/4 p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto">
           {filteredResults.length > 0 ? (
             filteredResults.map((obj, index) => (
               <Link
                 key={index}
                 to={`/object/${obj.object_id}`} // Navigate to ObjectDetail page
-                style={{
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
-                  padding: "15px",
-                  backgroundColor: "#fff",
-                  textAlign: "center",
-                  boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-                  textDecoration: "none",
-                  color: "inherit",
-                }}
+                className="border border-gray-300 rounded p-4 bg-white shadow hover:shadow-lg transition"
               >
                 <img
                   src={obj.thumbnailUrl || "default-thumbnail.jpg"}
                   alt={obj.title || "No Title"}
-                  style={{
-                    width: "100%",
-                    height: "200px",
-                    objectFit: "cover",
-                    marginBottom: "10px",
-                  }}
+                  className="w-full h-48 object-cover rounded mb-4"
                 />
-                <div style={{ textAlign: "left", margin: "10px 0" }}>
+                <div>
                   {obj.object_title && (
-                    <p style={{ fontSize: "1rem", fontWeight: "bold", margin: "0 0 5px 0" }}>
-                      {obj.object_title}
-                    </p>
+                    <p className="text-lg font-bold mb-1">{obj.object_title}</p>
                   )}
                   {obj.description && (
-                    <p style={{ fontSize: "0.9rem", margin: "0 0 5px 0", color: "#666" }}>
-                      {obj.description}
-                    </p>
+                    <p className="text-gray-600 text-sm mb-1">{obj.description}</p>
                   )}
                   {obj.object_id && (
-                    <p style={{ fontSize: "0.9rem", margin: "0 0 5px 0", color: "#999" }}>
+                    <p className="text-gray-500 text-xs">
                       <strong>ID:</strong> {obj.object_id}
                     </p>
                   )}
@@ -199,7 +141,7 @@ const ResultsPage = () => {
               </Link>
             ))
           ) : (
-            <p>No results found</p>
+            <p className="text-gray-500">No results found</p>
           )}
         </main>
       </div>

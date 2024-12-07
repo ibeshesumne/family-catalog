@@ -1,4 +1,3 @@
-// SearchPage.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -6,43 +5,36 @@ const SearchPage = () => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
-  const handleSearch = () => {
+  const handleSearch = (e) => {
+    e.preventDefault();
     if (query.trim()) {
-      navigate(`/results?q=${encodeURIComponent(query)}`); // Navigate to ResultsPage with query as URL parameter
+      navigate(`/results?q=${encodeURIComponent(query)}`);
     }
   };
 
   return (
-    <div style={{ textAlign: "center", padding: "40px 20px" }}>
-      <h1 style={{ fontSize: "2.5rem", marginBottom: "20px" }}>Search the Collection</h1>
-      <div>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Enter search terms..."
-          style={{
-            padding: "10px",
-            width: "60%",
-            marginRight: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-          }}
-        />
-        <button
-          onClick={handleSearch}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#007BFF",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
-        >
-          Search
-        </button>
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Search the Catalog</h1>
+      <form onSubmit={handleSearch} className="w-full max-w-md">
+        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+          <input
+            type="text"
+            placeholder="Enter search term"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-4 py-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            Search
+          </button>
+        </div>
+      </form>
+      <p className="text-sm text-gray-500 mt-4">
+        Use the search box above to find objects in the catalog.
+      </p>
     </div>
   );
 };

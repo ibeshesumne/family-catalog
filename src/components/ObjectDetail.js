@@ -25,7 +25,16 @@ const ObjectDetail = () => {
   }
 
   const filteredFields = Object.entries(objectData || {}).filter(
-    ([key, value]) => value && value !== ""
+    ([key, value]) =>
+      value &&
+      value !== "" &&
+      ![
+        "createdByemail",
+        "creationDate",
+        "modifiedDate",
+        "object_images",
+        "thumbnailUrl"
+      ].includes(key)
   );
 
   return (

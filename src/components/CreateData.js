@@ -122,14 +122,19 @@ const CreateData = ({ onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-4 bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-bold mb-4">Create New Record</h2>
+    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md space-y-6">
+      <h2 className="text-2xl font-bold">Create New Record</h2>
+
       <div>
-        <button type="button" onClick={() => toggleSection("general")} className="mb-2 bg-gray-200 p-2 rounded">
+        <button
+          type="button"
+          onClick={() => toggleSection("general")}
+          className="mb-4 bg-gray-200 p-2 rounded hover:bg-gray-300"
+        >
           General Information
         </button>
         <Collapse isOpened={openSections.general}>
-          <div>
+          <div className="space-y-4">
             <input
               type="text"
               name="object_id"
@@ -137,7 +142,7 @@ const CreateData = ({ onCancel }) => {
               value={formData.object_id}
               onChange={handleInputChange}
               required
-              className="block w-full mb-2 p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
             <input
               type="text"
@@ -145,14 +150,14 @@ const CreateData = ({ onCancel }) => {
               placeholder="Object Title"
               value={formData.object_title}
               onChange={handleInputChange}
-              className="block w-full mb-2 p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
             <select
               name="object_type"
               value={formData.object_type}
               onChange={handleInputChange}
               required
-              className="block w-full mb-2 p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="">Select Object Type</option>
               {objectTypes.map((type) => (
@@ -167,46 +172,54 @@ const CreateData = ({ onCancel }) => {
               placeholder="Title"
               value={formData.title}
               onChange={handleInputChange}
-              className="block w-full mb-2 p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
             <textarea
               name="description"
               placeholder="Description"
               value={formData.description}
               onChange={handleInputChange}
-              className="block w-full mb-2 p-2 border rounded"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
         </Collapse>
       </div>
 
       <div>
-        <button type="button" onClick={() => toggleSection("multimedia")} className="mb-2 bg-gray-200 p-2 rounded">
+        <button
+          type="button"
+          onClick={() => toggleSection("multimedia")}
+          className="mb-4 bg-gray-200 p-2 rounded hover:bg-gray-300"
+        >
           Multimedia
         </button>
         <Collapse isOpened={openSections.multimedia}>
-          <div>
-            <label>Upload Images:</label>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => handleFileChange(e, "object_images")}
-              className="block w-full mb-2"
-            />
-            <label>Upload Audio:</label>
-            <input
-              type="file"
-              multiple
-              accept="audio/*"
-              onChange={(e) => handleFileChange(e, "object_audio")}
-              className="block w-full mb-2"
-            />
+          <div className="space-y-4">
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">Upload Images:</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => handleFileChange(e, "object_images")}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">Upload Audio:</label>
+              <input
+                type="file"
+                multiple
+                accept="audio/*"
+                onChange={(e) => handleFileChange(e, "object_audio")}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
           </div>
         </Collapse>
       </div>
 
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-between">
         <button
           type="button"
           onClick={onCancel}

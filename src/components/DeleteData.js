@@ -1,9 +1,7 @@
-import React, { useState } from 'react'; // Ensure useState is imported here
+import React, { useState } from 'react';
 import { ref as storageRef, deleteObject } from "firebase/storage";
 import { ref as dbRef, get, remove } from "firebase/database";
-
-// Import Firebase configuration
-import { storage, db } from "../firebase"; // Ensure these are exported in firebase.js
+import { storage, db } from "../firebase";
 
 function DeleteData({ onDeleteSuccess, onCancel }) {
   const [recordId, setRecordId] = useState("");
@@ -54,8 +52,8 @@ function DeleteData({ onDeleteSuccess, onCancel }) {
       // Delete the record from the Realtime Database
       await remove(recordRef);
       alert("Record deleted successfully!");
-      setRecordId(""); // Reset the input field
-      if (onDeleteSuccess) onDeleteSuccess(recordId); // Notify parent about the deletion
+      setRecordId("");
+      if (onDeleteSuccess) onDeleteSuccess(recordId);
     } catch (error) {
       console.error("Error deleting record:", error.message);
       alert("Error deleting record. Please try again.");
@@ -66,9 +64,9 @@ function DeleteData({ onDeleteSuccess, onCancel }) {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-lg bg-white shadow-md rounded-lg p-8">
         <h2 className="text-2xl font-bold text-center mb-6">Delete Record</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="recordId" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="recordId" className="block text-sm font-medium text-gray-700 mb-2">
               Record ID
             </label>
             <input
@@ -79,20 +77,20 @@ function DeleteData({ onDeleteSuccess, onCancel }) {
               onChange={handleIdChange}
               placeholder="Enter Record ID"
               required
-              className="block w-full mt-1 p-2 border rounded-md"
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
             />
           </div>
-          <div className="flex justify-between mt-4">
+          <div className="flex justify-between">
             <button
               type="button"
-              onClick={onCancel} // Call cancel function
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md mr-2"
+              onClick={onCancel}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md"
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
             >
               Delete Record
             </button>

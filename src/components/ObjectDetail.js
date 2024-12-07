@@ -21,7 +21,7 @@ const ObjectDetail = () => {
   }, [objectId]);
 
   if (!objectData) {
-    return <p>Loading...</p>;
+    return <p className="text-center text-gray-500">Loading...</p>;
   }
 
   const filteredFields = Object.entries(objectData || {}).filter(
@@ -29,80 +29,35 @@ const ObjectDetail = () => {
   );
 
   return (
-    <div
-      className="object-detail"
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        padding: "20px",
-        maxWidth: "1200px",
-        margin: "0 auto",
-        gap: "20px",
-      }}
-    >
+    <div className="flex flex-col md:flex-row p-6 max-w-6xl mx-auto gap-6">
       {/* Sidebar for Object Details */}
-      <aside
-        style={{
-          width: "30%",
-          backgroundColor: "#f8f9fa",
-          padding: "20px",
-          borderRadius: "8px",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-        }}
-      >
-        <h2 style={{ marginBottom: "20px", fontSize: "1.5rem", fontWeight: "bold" }}>
-          Object Details
-        </h2>
+      <aside className="w-full md:w-1/3 bg-gray-100 p-6 rounded-lg shadow">
+        <h2 className="mb-6 text-xl font-bold">Object Details</h2>
         {filteredFields.map(([key, value]) => (
-          <div key={key} style={{ marginBottom: "15px" }}>
-            <h3 style={{ fontSize: "1rem", fontWeight: "bold", textTransform: "capitalize" }}>
+          <div key={key} className="mb-4">
+            <h3 className="text-sm font-bold capitalize text-gray-700">
               {key.replace(/_/g, " ")}:
             </h3>
-            <p style={{ fontSize: "0.9rem", margin: "5px 0" }}>{value}</p>
+            <p className="text-sm text-gray-600 mt-1">{value}</p>
           </div>
         ))}
       </aside>
 
       {/* Main Content Area */}
-      <main
-        style={{
-          width: "70%",
-          padding: "20px",
-          borderRadius: "8px",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-          textAlign: "center",
-        }}
-      >
+      <main className="w-full md:w-2/3 p-6 rounded-lg shadow text-center">
         {objectData.object_images && objectData.object_images.length > 0 ? (
           <img
             src={objectData.object_images[0]}
             alt={objectData.title || "Object Image"}
-            style={{
-              width: "100%",
-              maxHeight: "400px",
-              objectFit: "contain",
-              marginBottom: "20px",
-            }}
+            className="w-full max-h-96 object-contain mb-6 rounded"
           />
         ) : (
-          <p>No image available</p>
+          <p className="text-gray-500">No image available</p>
         )}
-        <h2
-          style={{
-            fontSize: "1.8rem",
-            fontWeight: "bold",
-            marginTop: "10px",
-          }}
-        >
+        <h2 className="text-2xl font-bold mt-4">
           {objectData.title || "Untitled"}
         </h2>
-        <p
-          style={{
-            fontSize: "1rem",
-            color: "#666",
-            marginTop: "10px",
-          }}
-        >
+        <p className="text-gray-600 mt-4">
           {objectData.description || "No description provided."}
         </p>
       </main>

@@ -12,6 +12,10 @@ const CreateData = ({ onCancel }) => {
     general: true,
     productionDetails: false,
     multimedia: false,
+    discovery: false,
+    physical: false,
+    ownershipAndAcquisition: false,
+    additional: false,
   });
 
   const [formData, setFormData] = useState({
@@ -31,6 +35,23 @@ const CreateData = ({ onCancel }) => {
     school_style: "",
     production_date: "",
     production_place: "",
+    excavator_field_collector: "",
+    findspot: "",
+    materials: "",
+    ware: "",
+    technique: "",
+    dimensions_h_w_d: "",
+    inscriptions: "",
+    acquisition_name: "",
+    previous_owner: "",
+    acquisition_date: "",
+    acquisition_notes: "",
+    curator_comment: "",
+    bibliographic_references: "",
+    object_location: "",
+    exhibition_history: "",
+    condition: "",
+    subjects: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -118,6 +139,23 @@ const CreateData = ({ onCancel }) => {
         school_style: "",
         production_date: "",
         production_place: "",
+        excavator_field_collector: "",
+        findspot: "",
+        materials: "",
+        ware: "",
+        technique: "",
+        dimensions_h_w_d: "",
+        inscriptions: "",
+        acquisition_name: "",
+        previous_owner: "",
+        acquisition_date: "",
+        acquisition_notes: "",
+        curator_comment: "",
+        bibliographic_references: "",
+        object_location: "",
+        exhibition_history: "",
+        condition: "",
+        subjects: "",
       });
 
       if (onCancel) onCancel();
@@ -248,6 +286,198 @@ const CreateData = ({ onCancel }) => {
               name="production_place"
               placeholder="Production Place"
               value={formData.production_place}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+        </Collapse>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={() => toggleSection("discovery")}
+          className="mb-4 bg-gray-200 p-2 rounded hover:bg-gray-300"
+        >
+          Discovery
+        </button>
+        <Collapse isOpened={openSections.discovery}>
+          <div className="space-y-4">
+            <input
+              type="text"
+              name="excavator_field_collector"
+              placeholder="Excavator/Field Collector"
+              value={formData.excavator_field_collector}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="findspot"
+              placeholder="Findspot"
+              value={formData.findspot}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+        </Collapse>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={() => toggleSection("physical")}
+          className="mb-4 bg-gray-200 p-2 rounded hover:bg-gray-300"
+        >
+          Physical
+        </button>
+        <Collapse isOpened={openSections.physical}>
+          <div className="space-y-4">
+            <input
+              type="text"
+              name="materials"
+              placeholder="Materials"
+              value={formData.materials}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="ware"
+              placeholder="Ware"
+              value={formData.ware}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="technique"
+              placeholder="Technique"
+              value={formData.technique}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="dimensions_h_w_d"
+              placeholder="Dimensions (H x W x D)"
+              value={formData.dimensions_h_w_d}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="inscriptions"
+              placeholder="Inscriptions"
+              value={formData.inscriptions}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+        </Collapse>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={() => toggleSection("ownershipAndAcquisition")}
+          className="mb-4 bg-gray-200 p-2 rounded hover:bg-gray-300"
+        >
+          Ownership and Acquisition
+        </button>
+        <Collapse isOpened={openSections.ownershipAndAcquisition}>
+          <div className="space-y-4">
+            <input
+              type="text"
+              name="acquisition_name"
+              placeholder="Acquisition Name"
+              value={formData.acquisition_name}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="previous_owner"
+              placeholder="Previous Owner"
+              value={formData.previous_owner}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="acquisition_date"
+              placeholder="Acquisition Date"
+              value={formData.acquisition_date}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="acquisition_notes"
+              placeholder="Acquisition Notes"
+              value={formData.acquisition_notes}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+        </Collapse>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={() => toggleSection("additional")}
+          className="mb-4 bg-gray-200 p-2 rounded hover:bg-gray-300"
+        >
+          Additional
+        </button>
+        <Collapse isOpened={openSections.additional}>
+          <div className="space-y-4">
+            <input
+              type="text"
+              name="curator_comment"
+              placeholder="Curator Comment"
+              value={formData.curator_comment}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="bibliographic_references"
+              placeholder="Bibliographic References"
+              value={formData.bibliographic_references}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="object_location"
+              placeholder="Object Location"
+              value={formData.object_location}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="exhibition_history"
+              placeholder="Exhibition History"
+              value={formData.exhibition_history}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="condition"
+              placeholder="Condition"
+              value={formData.condition}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              name="subjects"
+              placeholder="Subjects"
+              value={formData.subjects}
               onChange={handleInputChange}
               className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />

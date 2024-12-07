@@ -19,7 +19,10 @@ const ResultsPage = () => {
 
     onValue(objectsRef, (snapshot) => {
       const data = snapshot.val();
-      const results = Object.keys(data || {}).map((key) => data[key]);
+      const results = Object.entries(data || {}).map(([key, value]) => ({
+        object_id: key, // Use object_id as the key
+        ...value,
+      }));
       setObjects(results);
       setFilteredResults(results); // Initialize filtered results
     });
@@ -145,7 +148,7 @@ const ResultsPage = () => {
             width: "75%",
             padding: "20px",
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gridTemplateColumns: "repeat(3, 1fr)", // Maximum of 3 objects per row
             gap: "20px",
             overflowY: "auto",
           }}

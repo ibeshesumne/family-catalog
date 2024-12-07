@@ -8,21 +8,11 @@ const ObjectDetail = () => {
 
   useEffect(() => {
     const db = getDatabase();
-    const objectsRef = ref(db, "objects"); // Reference to the root objects node
+    const objectRef = ref(db, `objects/${objectId}`); // Directly reference object by object_id
 
-    console.log("Fetching data for Object ID:", objectId);
-
-    onValue(objectsRef, (snapshot) => {
-      const data = snapshot.val();
-      console.log("Fetched All Data:", data);
-
-      // Find the object with matching object_id
-      const matchingObject = Object.values(data || {}).find(
-        (obj) => obj.object_id === objectId
-      );
-
-      if (matchingObject) {
-        setObjectData(matchingObject);
+    onValue(objectRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setObjectData(snapshot.val());
       } else {
         console.error("Object not found for ID:", objectId);
         setObjectData(null);

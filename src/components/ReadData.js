@@ -31,9 +31,9 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
         return;
       }
 
-      // Map the records to an array with the Firebase ID
-      const allRecords = Object.entries(snapshot.val()).map(([id, data]) => ({
-        id, // Firebase key
+      // Map the records to an array with the object_id as the key
+      const allRecords = Object.entries(snapshot.val()).map(([object_id, data]) => ({
+        object_id, // Use object_id as the key
         ...data,
       }));
 
@@ -51,26 +51,19 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
       return;
     }
 
-    const dbRef = ref(db, "objects");
-
-    // Prepare queries for each field
-    const keywordQuery = query(dbRef, orderByChild("keyword"), equalTo(searchQuery));
-    const placeQuery = query(dbRef, orderByChild("place"), equalTo(searchQuery));
-    const objectIdQuery = query(dbRef, orderByChild("object_id"), equalTo(searchQuery));
+    // Query records by object_id
+    const objectIdQuery = query(ref(db, "objects"), orderByChild("object_id"), equalTo(searchQuery));
 
     try {
-      // Fetch results for all queries
-      const [keywordSnapshot, placeSnapshot, objectIdSnapshot] = await Promise.all([
-        get(keywordQuery),
-        get(placeQuery),
-        get(objectIdQuery),
-      ]);
+      const snapshot = await get(objectIdQuery);
 
-      // Combine results from all queries
+      // Process search results
       const results = [];
-      keywordSnapshot.forEach((child) => results.push(child.val()));
-      placeSnapshot.forEach((child) => results.push(child.val()));
-      objectIdSnapshot.forEach((child) => results.push(child.val()));
+      if (snapshot.exists()) {
+        snapshot.forEach((child) => {
+          results.push({ object_id: child.key, ...child.val() });
+        });
+      }
 
       setFilteredRecords(results); // Update state with filtered records
     } catch (error) {
@@ -100,38 +93,19 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
         <div className="mb-4">
           <input
             type="text"
-            placeholder="Search by keyword, place, or object ID"
+            placeholder="Search by object ID"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              padding: "10px",
-              width: "300px",
-              marginRight: "10px",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-            }}
+            className="p-2 border rounded w-72"
           />
-          <button
-            onClick={handleSearch}
-            style={{
-              padding: "10px 20px",
-              backgroundColor: "#007BFF",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
+          <button onClick={handleSearch} className="ml-4 p-2 bg-blue-500 text-white rounded">
             Search
           </button>
         </div>
 
         {/* Create New Record Button */}
         <div className="mb-4">
-          <button
-            onClick={onCreate} // Trigger Create mode
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
+          <button onClick={onCreate} className="p-2 bg-green-500 text-white rounded">
             Create New Record
           </button>
         </div>
@@ -141,7 +115,7 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
           data={records}
           headers={headers}
           filename="objects_records.csv"
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4 inline-block"
+          className="p-2 bg-gray-500 text-white rounded mb-4 inline-block"
         >
           Export Records to CSV
         </CSVLink>
@@ -150,10 +124,10 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
         {filteredRecords.length === 0 ? (
           <p className="text-gray-500">No records available</p>
         ) : (
-          <ul className="list-none p-0 space-y-4">
+          <ul className="space-y-4">
             {filteredRecords.map((record) => (
               <li
-                key={record.id}
+                key={record.object_id}
                 className="p-4 border border-gray-300 rounded flex flex-col space-y-2"
               >
                 {Object.entries(record).map(([key, value]) => {
@@ -196,14 +170,14 @@ function ReadData({ onSelectRecord, onDelete, onCreate }) {
                 })}
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => onSelectRecord(record)} // Pass selected record to parent
-                    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={() => onSelectRecord(record)}
+                    className="p-2 bg-yellow-500 text-white rounded"
                   >
                     Review Record
                   </button>
                   <button
-                    onClick={() => onDelete(record)} // Trigger delete action
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={() => onDelete(record)}
+                    className="p-2 bg-red-500 text-white rounded"
                   >
                     Delete Record
                   </button>

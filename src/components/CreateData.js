@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { db, storage } from "../firebase"; // Import Firebase Storage
-import { ref as dbRef, push } from "firebase/database";
+import { ref as dbRef, set } from "firebase/database";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useAuth } from "./Auth/AuthContext";
 import { Collapse } from "react-collapse";
@@ -94,8 +94,8 @@ const CreateData = ({ onCancel }) => {
       };
 
       // Push the record to Firebase
-      const recordsRef = dbRef(db, "objects");
-      await push(recordsRef, updatedFormData);
+      const recordRef = dbRef(db, `objects/${formData.object_id}`);
+      await set(recordRef, updatedFormData);
 
       alert("Record added successfully!");
       setFormData({

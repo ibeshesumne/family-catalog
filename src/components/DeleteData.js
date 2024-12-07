@@ -44,10 +44,10 @@ function DeleteData({ onDeleteSuccess, onCancel }) {
       const recordData = snapshot.val();
 
       // Delete associated files from Firebase Storage
-      if (recordData.object_images) {
+      if (recordData.object_images && recordData.object_images.length > 0) {
         await deleteFiles(recordData.object_images);
       }
-      if (recordData.object_audio) {
+      if (recordData.object_audio && recordData.object_audio.length > 0) {
         await deleteFiles(recordData.object_audio);
       }
 
@@ -55,7 +55,7 @@ function DeleteData({ onDeleteSuccess, onCancel }) {
       await remove(recordRef);
       alert("Record deleted successfully!");
       setRecordId(""); // Reset the input field
-      onDeleteSuccess(recordId); // Notify parent about the deletion
+      if (onDeleteSuccess) onDeleteSuccess(recordId); // Notify parent about the deletion
     } catch (error) {
       console.error("Error deleting record:", error.message);
       alert("Error deleting record. Please try again.");

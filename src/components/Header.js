@@ -8,11 +8,20 @@ const Header = () => {
   return (
     <header className="bg-gray-800 text-white p-4">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-lg font-bold">Record Management App</h1>
+        <h1 className="text-lg font-bold">Catalog App</h1>
         <nav className="flex space-x-4">
+          {/* Public Links */}
           <Link to="/" className="hover:underline">
             Home
           </Link>
+          <Link to="/search" className="hover:underline">
+            Search
+          </Link>
+          <Link to="/collection" className="hover:underline">
+            Collection
+          </Link>
+
+          {/* Authenticated Links */}
           {currentUser && (
             <>
               <Link to="/records" className="hover:underline">
@@ -23,6 +32,8 @@ const Header = () => {
               </Link>
             </>
           )}
+
+          {/* Unauthenticated Links */}
           {!currentUser && (
             <>
               <Link to="/login" className="hover:underline">

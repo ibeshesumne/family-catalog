@@ -14,7 +14,7 @@ const Login = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       setError('');
-      navigate('/create'); // Navigate to the protected route
+      navigate('/search'); // Navigate to the protected route
     } catch (err) {
       setError('Invalid credentials. Please try again.');
     }

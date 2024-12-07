@@ -17,6 +17,12 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
         object_audio: selectedRecord.object_audio || [],
         thumbnailUrl: selectedRecord.thumbnailUrl || "",
         modifiedDate: new Date().toISOString(),
+        production_ethnic_group: selectedRecord.production_ethnic_group || "",
+        culture_period: selectedRecord.culture_period || "",
+        producer_name: selectedRecord.producer_name || "",
+        school_style: selectedRecord.school_style || "",
+        production_date: selectedRecord.production_date || "",
+        production_place: selectedRecord.production_place || "",
       });
     }
   }, [selectedRecord]);
@@ -35,15 +41,11 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
 
   const handleDeleteImage = (imageUrl) => {
     setImagesToDelete((prev) => [...prev, imageUrl]);
-    setFormData((prev) => {
-      const updatedImages = (prev.object_images || []).filter((url) => url !== imageUrl);
-      const updatedThumbnail = prev.thumbnailUrl === imageUrl ? (updatedImages[0] || null) : prev.thumbnailUrl;
-      return {
-        ...prev,
-        object_images: updatedImages,
-        thumbnailUrl: updatedThumbnail,
-      };
-    });
+    setFormData((prev) => ({
+      ...prev,
+      object_images: (prev.object_images || []).filter((url) => url !== imageUrl),
+      thumbnailUrl: prev.thumbnailUrl === imageUrl ? null : prev.thumbnailUrl,
+    }));
   };
 
   const uploadFiles = async (files, folder) => {
@@ -103,90 +105,93 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
     }
   };
 
-  const renderInputFields = () => {
-    return Object.entries(formData).map(([key, value]) => {
-      if (key === "object_images") {
-        return (
-          <div key={key} className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Existing Images</label>
-            <div className="grid grid-cols-2 gap-4 mt-2">
-              {value.map((imageUrl, index) => (
-                <div key={index} className="relative">
-                  <img
-                    src={imageUrl}
-                    alt={`Object ${index + 1}`}
-                    className="w-full h-auto rounded-lg shadow border"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteImage(imageUrl)}
-                    className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-            <label className="block text-sm font-medium text-gray-700 mt-4">Add New Images</label>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => handleFileChange(e, setNewImages)}
-              className="block w-full mt-1 p-2 border border-gray-300 rounded"
-            />
-          </div>
-        );
-      }
-
-      if (key === "object_audio") {
-        return (
-          <div key={key} className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Add New Audio</label>
-            <input
-              type="file"
-              multiple
-              accept="audio/*"
-              onChange={(e) => handleFileChange(e, setNewAudio)}
-              className="block w-full mt-1 p-2 border border-gray-300 rounded"
-            />
-          </div>
-        );
-      }
-
-      if (key === "thumbnailUrl") {
-        return (
-          <div key={key} className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Thumbnail</label>
-            {value ? (
-              <img
-                src={value}
-                alt="Thumbnail"
-                className="w-24 h-24 object-cover rounded-md border border-gray-300 mt-2"
-              />
-            ) : (
-              <div className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md mt-2">
-                No Thumbnail
+  const renderInputFields = () => (
+    <>
+      {Object.entries(formData).map(([key, value]) => {
+        if (key === "object_images") {
+          return (
+            <div key={key} className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Existing Images</label>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                {Array.isArray(value) &&
+                  value.map((imageUrl, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={imageUrl}
+                        alt={`Object ${index + 1}`}
+                        className="w-full h-auto rounded-lg shadow border"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteImage(imageUrl)}
+                        className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
               </div>
-            )}
+              <label className="block text-sm font-medium text-gray-700 mt-4">Add New Images</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => handleFileChange(e, setNewImages)}
+                className="block w-full mt-1 p-2 border border-gray-300 rounded"
+              />
+            </div>
+          );
+        }
+
+        if (key === "object_audio") {
+          return (
+            <div key={key} className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Add New Audio</label>
+              <input
+                type="file"
+                multiple
+                accept="audio/*"
+                onChange={(e) => handleFileChange(e, setNewAudio)}
+                className="block w-full mt-1 p-2 border border-gray-300 rounded"
+              />
+            </div>
+          );
+        }
+
+        if (key === "thumbnailUrl") {
+          return (
+            <div key={key} className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Thumbnail</label>
+              {value ? (
+                <img
+                  src={value}
+                  alt="Thumbnail"
+                  className="w-24 h-24 object-cover rounded-md border border-gray-300 mt-2"
+                />
+              ) : (
+                <div className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md mt-2">
+                  No Thumbnail
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        return (
+          <div key={key} className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">{key.replace(/_/g, " ").toUpperCase()}</label>
+            <input
+              type="text"
+              name={key}
+              value={value || ""}
+              onChange={handleChange}
+              className="block w-full mt-1 p-2 border border-gray-300 rounded"
+            />
           </div>
         );
-      }
-
-      return (
-        <div key={key} className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">{key.replace(/_/g, " ").toUpperCase()}</label>
-          <input
-            type="text"
-            name={key}
-            value={value || ""}
-            onChange={handleChange}
-            className="block w-full mt-1 p-2 border border-gray-300 rounded"
-          />
-        </div>
-      );
-    });
-  };
+      })}
+    </>
+  );
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

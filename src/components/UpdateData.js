@@ -23,6 +23,23 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
         school_style: selectedRecord.school_style || "",
         production_date: selectedRecord.production_date || "",
         production_place: selectedRecord.production_place || "",
+        excavator_field_collector: selectedRecord.excavator_field_collector || "",
+        findspot: selectedRecord.findspot || "",
+        materials: selectedRecord.materials || "",
+        ware: selectedRecord.ware || "",
+        technique: selectedRecord.technique || "",
+        dimensions_h_w_d: selectedRecord.dimensions_h_w_d || "",
+        inscriptions: selectedRecord.inscriptions || "",
+        acquisition_name: selectedRecord.acquisition_name || "",
+        previous_owner: selectedRecord.previous_owner || "",
+        acquisition_date: selectedRecord.acquisition_date || "",
+        acquisition_notes: selectedRecord.acquisition_notes || "",
+        curator_comment: selectedRecord.curator_comment || "",
+        bibliographic_references: selectedRecord.bibliographic_references || "",
+        object_location: selectedRecord.object_location || "",
+        exhibition_history: selectedRecord.exhibition_history || "",
+        condition: selectedRecord.condition || "",
+        subjects: selectedRecord.subjects || "",
       });
     }
   }, [selectedRecord]);

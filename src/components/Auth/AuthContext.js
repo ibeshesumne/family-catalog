@@ -6,6 +6,19 @@ import { db } from "../../firebase"; // Adjust the path to your firebase.js
 // Create the AuthContext
 const AuthContext = createContext();
 
+// Retry utility
+const retry = async (fn, retries = 3, delay = 1000) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      console.warn(`Retry ${i + 1} failed: ${error.message}`);
+      if (i === retries - 1) throw error; // If it's the last retry, rethrow
+      await new Promise((resolve) => setTimeout(resolve, delay)); // Wait before retrying
+    }
+  }
+};
+
 // AuthProvider component to wrap the app
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -27,9 +40,9 @@ export const AuthProvider = ({ children }) => {
           const base64Email = btoa(user.email);
           console.log(`Base64-encoded email: ${base64Email}`);
 
-          // Check if the user's email exists in the whitelist
+          // Check if the user's email exists in the whitelist with retry
           const whitelistRef = ref(db, `whitelistedEmails/${base64Email}`);
-          const whitelistSnapshot = await get(whitelistRef);
+          const whitelistSnapshot = await retry(() => get(whitelistRef));
 
           if (!whitelistSnapshot.exists()) {
             console.warn(`User ${user.email} is not whitelisted. Signing out.`);
@@ -43,9 +56,9 @@ export const AuthProvider = ({ children }) => {
           console.log(`User ${user.email} is whitelisted.`);
           setCurrentUser(user);
 
-          // Check the userType for additional roles
+          // Check the userType for additional roles with retry
           const userRef = ref(db, `users/${user.uid}/userType`);
-          const snapshot = await get(userRef);
+          const snapshot = await retry(() => get(userRef));
 
           if (snapshot.exists()) {
             setUserType(snapshot.val());

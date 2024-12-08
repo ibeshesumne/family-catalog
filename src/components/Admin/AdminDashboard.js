@@ -1,30 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { ref, get, remove, set } from 'firebase/database';
-import { db } from '../../firebase'; // Adjust the path
+import React, { useState, useEffect } from "react";
+import { ref, get, remove, set } from "firebase/database";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { db, auth } from "../../firebase";
 
 const AdminDashboard = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
+  // Fetch pending requests from Firebase
   useEffect(() => {
     const fetchPendingRequests = async () => {
       try {
-        const pendingRef = ref(db, 'pendingRequests');
+        const pendingRef = ref(db, "pendingRequests");
         const snapshot = await get(pendingRef);
 
         if (snapshot.exists()) {
           const requests = snapshot.val();
-          const requestList = Object.entries(requests).map(([key, value]) => ({
+          const formattedRequests = Object.keys(requests).map((key) => ({
             id: key,
-            ...value,
+            ...requests[key],
           }));
-          setPendingRequests(requestList);
+          setPendingRequests(formattedRequests);
         } else {
           setPendingRequests([]);
         }
-      } catch (err) {
-        setError('Error fetching pending requests: ' + err.message);
+      } catch (error) {
+        console.error("Error fetching pending requests:", error.message);
       } finally {
         setLoading(false);
       }
@@ -33,75 +34,93 @@ const AdminDashboard = () => {
     fetchPendingRequests();
   }, []);
 
-  const handleApprove = async (id, email) => {
+  // Approve a user
+  const approveUser = async (email) => {
     try {
-      // Add email to whitelistedEmails
-      const whitelistRef = ref(db, `whitelistedEmails/${id}`);
+      const defaultPassword = "defaultPassword123";
+
+      console.log(`Approving user: ${email}`);
+      // Create user in Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, email, defaultPassword);
+      console.log(`User created: ${userCredential.user.uid}`);
+
+      // Add the user to the whitelistedEmails node
+      const whitelistRef = ref(db, `whitelistedEmails/${btoa(email)}`);
       await set(whitelistRef, true);
 
-      // Remove from pendingRequests
-      const pendingRef = ref(db, `pendingRequests/${id}`);
-      await remove(pendingRef);
+      // Remove the user from pendingRequests
+      const pendingRef = ref(db, `pendingRequests/${btoa(email)}`);
+      await remove(pendingRef); // Ensure this runs correctly
+      console.log(`Removed ${email} from pending requests.`);
 
-      // Update the local state
-      setPendingRequests((prev) => prev.filter((req) => req.id !== id));
-      alert(`${email} has been approved and added to the whitelist.`);
-    } catch (err) {
-      console.error('Error approving request:', err.message);
-      alert('Failed to approve the request.');
+      alert(`User ${email} has been approved and added to the system.`);
+      // Refresh pending requests list
+      setPendingRequests((prev) => prev.filter((request) => request.email !== email));
+    } catch (error) {
+      console.error("Error approving user:", error.message);
+      alert(`Error approving user: ${error.message}`);
     }
   };
 
-  const handleReject = async (id, email) => {
+  // Reject a user
+  const rejectUser = async (email) => {
     try {
-      // Remove from pendingRequests
-      const pendingRef = ref(db, `pendingRequests/${id}`);
+      // Remove the user from pendingRequests
+      const pendingRef = ref(db, `pendingRequests/${btoa(email)}`);
       await remove(pendingRef);
 
-      // Update the local state
-      setPendingRequests((prev) => prev.filter((req) => req.id !== id));
-      alert(`${email} has been rejected.`);
-    } catch (err) {
-      console.error('Error rejecting request:', err.message);
-      alert('Failed to reject the request.');
+      alert(`User ${email} has been rejected.`);
+      // Refresh pending requests list
+      setPendingRequests((prev) => prev.filter((request) => request.email !== email));
+    } catch (error) {
+      console.error("Error rejecting user:", error.message);
+      alert(`Error rejecting user: ${error.message}`);
     }
   };
 
-  if (loading) return <p>Loading pending requests...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  if (loading) {
+    return <p>Loading pending requests...</p>;
+  }
 
   return (
-    <div className="max-w-3xl mx-auto p-5 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
+    <div className="admin-dashboard">
+      <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
       {pendingRequests.length === 0 ? (
         <p>No pending requests.</p>
       ) : (
-        <ul className="space-y-4">
-          {pendingRequests.map((req) => (
-            <li key={req.id} className="p-4 border border-gray-300 rounded">
-              <p>
-                <strong>Email:</strong> {req.email}
-              </p>
-              <p>
-                <strong>Requested At:</strong> {new Date(req.requestedAt).toLocaleString()}
-              </p>
-              <div className="flex space-x-4 mt-2">
-                <button
-                  onClick={() => handleApprove(req.id, req.email)}
-                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700"
-                >
-                  Approve
-                </button>
-                <button
-                  onClick={() => handleReject(req.id, req.email)}
-                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700"
-                >
-                  Reject
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <table className="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 border-b">Email</th>
+              <th className="px-4 py-2 border-b">Requested At</th>
+              <th className="px-4 py-2 border-b">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pendingRequests.map((request) => (
+              <tr key={request.id}>
+                <td className="px-4 py-2 border-b">{request.email}</td>
+                <td className="px-4 py-2 border-b">
+                  {new Date(request.requestedAt).toLocaleString()}
+                </td>
+                <td className="px-4 py-2 border-b">
+                  <button
+                    className="bg-green-500 text-white px-3 py-1 rounded mr-2"
+                    onClick={() => approveUser(request.email)}
+                  >
+                    Approve
+                  </button>
+                  <button
+                    className="bg-red-500 text-white px-3 py-1 rounded"
+                    onClick={() => rejectUser(request.email)}
+                  >
+                    Reject
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );

@@ -52,7 +52,8 @@ const Register = () => {
       // Redirect to the login page
       navigate('/login');
     } catch (error) {
-      setError('Registration failed: ' + error.message);
+      // Correct string interpolation
+      setError(`Registration failed: ${error.message}`);
     } finally {
       setLoading(false);
     }

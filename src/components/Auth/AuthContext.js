@@ -19,11 +19,16 @@ export const AuthProvider = ({ children }) => {
     // Subscribe to auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        console.log(`User signed in: ${user.email}`);
         setEmailVerified(user.emailVerified);
 
         try {
+          // Log Base64-encoded email
+          const base64Email = btoa(user.email);
+          console.log(`Base64-encoded email: ${base64Email}`);
+
           // Check if the user's email exists in the whitelist
-          const whitelistRef = ref(db, `whitelistedEmails/${btoa(user.email)}`);
+          const whitelistRef = ref(db, `whitelistedEmails/${base64Email}`);
           const whitelistSnapshot = await get(whitelistRef);
 
           if (!whitelistSnapshot.exists()) {
@@ -35,17 +40,19 @@ export const AuthProvider = ({ children }) => {
             return;
           }
 
-          // If whitelisted, proceed with fetching additional user data
+          console.log(`User ${user.email} is whitelisted.`);
           setCurrentUser(user);
 
+          // Check the userType for additional roles
           const userRef = ref(db, `users/${user.uid}/userType`);
           const snapshot = await get(userRef);
 
           if (snapshot.exists()) {
             setUserType(snapshot.val());
+            console.log(`User type for ${user.email}: ${snapshot.val()}`);
           } else {
-            console.warn("No userType found for this user; defaulting to regular.");
-            setUserType("regular"); // Default to 'regular' if no userType exists
+            console.warn(`No userType found for ${user.email}. Defaulting to 'regular'.`);
+            setUserType("regular");
           }
         } catch (error) {
           console.error("Error during authentication check:", error.message);
@@ -53,6 +60,7 @@ export const AuthProvider = ({ children }) => {
           setUserType("regular");
         }
       } else {
+        console.log("User signed out.");
         // Reset states when user logs out
         setCurrentUser(null);
         setEmailVerified(false);

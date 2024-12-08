@@ -38,21 +38,25 @@ const AdminDashboard = () => {
   const approveUser = async (email) => {
     try {
       const defaultPassword = "defaultPassword123";
-
+  
       console.log(`Approving user: ${email}`);
-      // Create user in Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(auth, email, defaultPassword);
-      console.log(`User created: ${userCredential.user.uid}`);
-
+      // Create user in Firebase Authentication without logging in as the new user
+      const userCredential = await auth.createUser({
+        email: email,
+        password: defaultPassword,
+      });
+  
+      console.log(`User created: ${userCredential.uid}`);
+  
       // Add the user to the whitelistedEmails node
       const whitelistRef = ref(db, `whitelistedEmails/${btoa(email)}`);
       await set(whitelistRef, true);
-
+  
       // Remove the user from pendingRequests
       const pendingRef = ref(db, `pendingRequests/${btoa(email)}`);
-      await remove(pendingRef); // Ensure this runs correctly
+      await remove(pendingRef);
       console.log(`Removed ${email} from pending requests.`);
-
+  
       alert(`User ${email} has been approved and added to the system.`);
       // Refresh pending requests list
       setPendingRequests((prev) => prev.filter((request) => request.email !== email));

@@ -1,7 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getDatabase, ref, onValue } from "firebase/database";
-import { objectTypes } from "./constants";
+
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
 
 const Collection = () => {
   const [objects, setObjects] = useState([]);
@@ -28,24 +35,42 @@ const Collection = () => {
     });
   }, []);
 
+  const debouncedSetFilteredResults = useMemo(
+    () =>
+      debounce((filtered) => {
+        setFilteredResults(filtered);
+      }, 300),
+    []
+  );
+
   const applyFilters = useCallback(() => {
-    setFilteredResults(
-      objects.filter((obj) => {
-        const matchesObjectTitle =
-          !filters.object_title ||
-          obj.object_title?.toLowerCase().includes(filters.object_title.toLowerCase());
-        const matchesObjectType =
-          !filters.object_type || obj.object_type === filters.object_type;
-        const matchesObjectId =
-          !filters.object_id ||
-          obj.object_id?.toLowerCase().includes(filters.object_id.toLowerCase());
-        const matchesTitle =
-          !filters.title ||
-          obj.title?.toLowerCase().includes(filters.title.toLowerCase());
-        return matchesObjectTitle && matchesObjectType && matchesObjectId && matchesTitle;
-      })
-    );
-  }, [filters, objects]);
+    const filtered = objects.filter((obj) => {
+      const matchesObjectTitle =
+        !filters.object_title ||
+        obj.object_title?.toLowerCase().includes(filters.object_title.toLowerCase());
+      const matchesObjectType =
+        !filters.object_type ||
+        obj.object_type?.toLowerCase().includes(filters.object_type.toLowerCase());
+      const matchesObjectId =
+        !filters.object_id ||
+        obj.object_id?.toLowerCase().includes(filters.object_id.toLowerCase());
+      const matchesTitle =
+        !filters.title ||
+        obj.title?.toLowerCase().includes(filters.title.toLowerCase());
+      return (
+        matchesObjectTitle &&
+        matchesObjectType &&
+        matchesObjectId &&
+        matchesTitle
+      );
+    });
+
+    debouncedSetFilteredResults(filtered);
+  }, [objects, filters, debouncedSetFilteredResults]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [filters, applyFilters]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -54,10 +79,6 @@ const Collection = () => {
       [name]: value,
     }));
   };
-
-  useEffect(() => {
-    applyFilters();
-  }, [applyFilters]);
 
   return (
     <div className="flex min-h-screen">
@@ -72,19 +93,14 @@ const Collection = () => {
           onChange={handleFilterChange}
           className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
-        <select
+        <input
+          type="text"
           name="object_type"
+          placeholder="Filter by Object Type"
           value={filters.object_type}
           onChange={handleFilterChange}
           className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-        >
-          <option value="">All Object Types</option>
-          {objectTypes.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
+        />
         <input
           type="text"
           name="object_id"

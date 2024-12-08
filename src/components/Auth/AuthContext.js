@@ -40,15 +40,37 @@ export const AuthProvider = ({ children }) => {
           const base64Email = btoa(user.email);
           console.log(`Base64-encoded email: ${base64Email}`);
 
-          // Check if the user's email exists in the whitelist with retry
+          // Check if the user's email exists in the whitelist with retry and delay
           const whitelistRef = ref(db, `whitelistedEmails/${base64Email}`);
-          const whitelistSnapshot = await retry(() => get(whitelistRef));
+          let whitelistSnapshot;
+          let retries = 0;
+          const maxRetries = 3;
+          const delay = 1000; // 1 second delay
+
+          while (retries < maxRetries) {
+            try {
+              whitelistSnapshot = await get(whitelistRef);
+              if (whitelistSnapshot.exists()) break;
+            } catch (error) {
+              console.warn(`Retry ${retries + 1} failed: ${error.message}`);
+            }
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            retries++;
+          }
 
           if (!whitelistSnapshot.exists()) {
             console.warn(`User ${user.email} is not whitelisted. Signing out.`);
             alert("Your email is not whitelisted. Please contact the administrator.");
-            await signOut(auth); // Log out the user
-            setCurrentUser(null);
+
+            // Check if the current user is an admin before logging out
+            const userRef = ref(db, `users/${user.uid}/userType`);
+            const userTypeSnapshot = await retry(() => get(userRef));
+            if (userTypeSnapshot.exists() && userTypeSnapshot.val() === 'admin') {
+              console.log("Admin user, do not log out.");
+            } else {
+              await signOut(auth); // Log out the user
+              setCurrentUser(null);
+            }
             setLoading(false);
             return;
           }

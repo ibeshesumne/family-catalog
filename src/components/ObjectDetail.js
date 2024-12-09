@@ -42,6 +42,15 @@ const ObjectDetail = () => {
 
   const resetZoom = () => setZoomScale(1); // Reset zoom to original scale
 
+  // Fields to exclude from the left vertical panel
+  const excludedFields = [
+    "createdByEmail",
+    "creationDate",
+    "modifiedDate",
+    "object_images",
+    "thumbnailUrl",
+  ];
+
   return (
     <div className="flex flex-col md:flex-row p-6 max-w-6xl mx-auto gap-6">
       {isMobile ? (
@@ -71,9 +80,8 @@ const ObjectDetail = () => {
                 {Object.entries(objectData || {})
                   .filter(
                     ([key, value]) =>
-                      value &&
-                      value !== "" &&
-                      !["createdByEmail", "creationDate", "modifiedDate", "object_images", "thumbnailUrl"].includes(key)
+                      value && // Ensure the field has content (not null, undefined, or empty string)
+                      !excludedFields.includes(key) // Exclude specific fields
                   )
                   .map(([key, value]) => (
                     <div key={key} className="mb-4">
@@ -105,7 +113,37 @@ const ObjectDetail = () => {
         <>
           {/* Desktop Layout */}
           <aside className="relative w-full md:w-1/3 bg-gray-100 rounded-lg shadow flex flex-col">
-            <DesktopObjectDetails data={objectData} />
+            <div
+              className="flex-grow overflow-y-auto p-6"
+              style={{ maxHeight: "calc(100vh - 60px)" }}
+            >
+              <h2 className="mb-6 text-xl font-bold">Object Details</h2>
+              {Object.entries(objectData || {})
+                .filter(
+                  ([key, value]) =>
+                    value && // Ensure the field has content (not null, undefined, or empty string)
+                    !excludedFields.includes(key) // Exclude specific fields
+                )
+                .map(([key, value]) => (
+                  <div key={key} className="mb-4">
+                    <h3 className="text-sm font-bold capitalize text-gray-700">
+                      {key.replace(/_/g, " ")}:
+                    </h3>
+                    <p
+                      className="text-sm text-gray-600 mt-1"
+                      dangerouslySetInnerHTML={{ __html: parseDescription(value) }}
+                    ></p>
+                  </div>
+                ))}
+            </div>
+            <div className="p-4 bg-bmGreen text-bmWhite text-center" style={{ height: "60px" }}>
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center justify-center text-sm font-bold"
+              >
+                ← Back to Results
+              </button>
+            </div>
           </aside>
           <main className="w-full md:w-2/3 bg-gray-50 rounded-lg shadow flex flex-col">
             <DesktopImageViewer images={objectData.object_images} />

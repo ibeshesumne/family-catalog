@@ -120,7 +120,7 @@ body {
 /* Zoom Buttons */
 .zoom-button {
   background-color: #202124;
-  color: white;
+  color: #FFFFFF;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -130,9 +130,13 @@ body {
   background-color: #444444;
 }
 
+.zoom-button {
+  padding: 10px;
+}
+
 .zoom-button svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
 /* Main Panel Adjustments */

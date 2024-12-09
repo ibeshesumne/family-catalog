@@ -30,6 +30,7 @@
 // - reportWebVitals.js
 // - setupTests.js
 // - utils\fetchData.js
+// - utils\urlParser.js
 // =============================================
 
 
@@ -192,21 +193,25 @@ const AdminDashboard = () => {
   const approveUser = async (email) => {
     try {
       const defaultPassword = "defaultPassword123";
-
+  
       console.log(`Approving user: ${email}`);
-      // Create user in Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(auth, email, defaultPassword);
-      console.log(`User created: ${userCredential.user.uid}`);
-
+      // Create user in Firebase Authentication without logging in as the new user
+      const userCredential = await auth.createUser({
+        email: email,
+        password: defaultPassword,
+      });
+  
+      console.log(`User created: ${userCredential.uid}`);
+  
       // Add the user to the whitelistedEmails node
       const whitelistRef = ref(db, `whitelistedEmails/${btoa(email)}`);
       await set(whitelistRef, true);
-
+  
       // Remove the user from pendingRequests
       const pendingRef = ref(db, `pendingRequests/${btoa(email)}`);
-      await remove(pendingRef); // Ensure this runs correctly
+      await remove(pendingRef);
       console.log(`Removed ${email} from pending requests.`);
-
+  
       alert(`User ${email} has been approved and added to the system.`);
       // Refresh pending requests list
       setPendingRequests((prev) => prev.filter((request) => request.email !== email));
@@ -1687,6 +1692,7 @@ export default Home;
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getDatabase, ref, onValue } from "firebase/database";
+import { parseDescription } from "../utils/urlParser"; // Importing the updated parseDescription function
 
 const ObjectDetail = () => {
   const { objectId } = useParams(); // Extract objectId from the URL
@@ -1719,7 +1725,7 @@ const ObjectDetail = () => {
         "creationDate",
         "modifiedDate",
         "object_images",
-        "thumbnailUrl"
+        "thumbnailUrl",
       ].includes(key)
   );
 
@@ -1733,7 +1739,13 @@ const ObjectDetail = () => {
             <h3 className="text-sm font-bold capitalize text-gray-700">
               {key.replace(/_/g, " ")}:
             </h3>
-            <p className="text-sm text-gray-600 mt-1">{value}</p>
+            {console.log("Parsed bibliographic_references:", parseDescription(objectData.bibliographic_references || ""))}
+            {/* Parsing the value and rendering as HTML */}
+            <p
+              className="text-sm text-gray-600 mt-1"
+              dangerouslySetInnerHTML={{ __html: parseDescription(value) }}
+            ></p>
+            {console.log("Parsed HTML:", parseDescription(value))}
           </div>
         ))}
       </aside>
@@ -1752,9 +1764,12 @@ const ObjectDetail = () => {
         <h2 className="text-2xl font-bold mt-4">
           {objectData.title || "Untitled"}
         </h2>
-        <p className="text-gray-600 mt-4">
-          {objectData.description || "No description provided."}
-        </p>
+        <p
+          className="text-gray-600 mt-4"
+          dangerouslySetInnerHTML={{
+            __html: parseDescription(objectData.description || ""),
+          }}
+        ></p>
       </main>
     </div>
   );
@@ -7956,6 +7971,60 @@ export const fetchData = async () => {
 
 // ---------------------------------------------
 // END: utils\fetchData.js
+// ---------------------------------------------
+
+
+// ---------------------------------------------
+// BEGIN: utils\urlParser.js
+// ---------------------------------------------
+
+// src/utils/urlParser.js
+
+/**
+ * Truncates a URL to a maximum length for display purposes.
+ * @param {string} url - The URL to truncate.
+ * @param {number} maxLength - The maximum length of the displayed URL.
+ * @returns {string} - The truncated URL.
+ */
+export const truncateUrl = (url, maxLength = 30) => {
+  if (url.length <= maxLength) return url;
+  return `${url.substring(0, maxLength)}...`;
+};
+
+/**
+ * Parses a string containing URLs or Markdown-style links into HTML links.
+ * Supports plain URLs and Markdown-style `[Text](URL)` links.
+ * @param {string} description - The input string to parse.
+ * @returns {string} - The string with URLs converted to HTML links.
+ */
+export const parseDescription = (description) => {
+  if (typeof description !== "string") {
+    description = String(description).trim(); // Ensure input is a string
+  }
+
+  // Regex for Markdown-style links: [Text](URL)
+  const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+
+  // Regex for plain URLs (not wrapped in Markdown-style links)
+  const urlRegex = /(?<!["'>])\bhttps?:\/\/[^\s<>()]+\b/g;
+
+  // Replace Markdown-style links with inline HTML links
+  let parsedDescription = description.replace(markdownLinkRegex, (match, text, url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-link">${text}</a>`;
+  });
+
+  // Replace plain URLs with truncated inline HTML links
+  parsedDescription = parsedDescription.replace(urlRegex, (url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-link">${truncateUrl(url)}</a>`;
+  });
+
+  // Replace newline characters with <br> tags for proper text formatting
+  return parsedDescription.replace(/\n/g, "<br>");
+};
+
+
+// ---------------------------------------------
+// END: utils\urlParser.js
 // ---------------------------------------------
 
 // =============================================

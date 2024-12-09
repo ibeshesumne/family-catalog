@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getDatabase, ref, onValue } from "firebase/database";
+import { parseDescription } from "../utils/urlParser"; // Importing the updated parseDescription function
 
 const ObjectDetail = () => {
   const { objectId } = useParams(); // Extract objectId from the URL
@@ -33,7 +34,7 @@ const ObjectDetail = () => {
         "creationDate",
         "modifiedDate",
         "object_images",
-        "thumbnailUrl"
+        "thumbnailUrl",
       ].includes(key)
   );
 
@@ -47,7 +48,13 @@ const ObjectDetail = () => {
             <h3 className="text-sm font-bold capitalize text-gray-700">
               {key.replace(/_/g, " ")}:
             </h3>
-            <p className="text-sm text-gray-600 mt-1">{value}</p>
+            {console.log("Parsed bibliographic_references:", parseDescription(objectData.bibliographic_references || ""))}
+            {/* Parsing the value and rendering as HTML */}
+            <p
+              className="text-sm text-gray-600 mt-1"
+              dangerouslySetInnerHTML={{ __html: parseDescription(value) }}
+            ></p>
+            {console.log("Parsed HTML:", parseDescription(value))}
           </div>
         ))}
       </aside>
@@ -66,9 +73,12 @@ const ObjectDetail = () => {
         <h2 className="text-2xl font-bold mt-4">
           {objectData.title || "Untitled"}
         </h2>
-        <p className="text-gray-600 mt-4">
-          {objectData.description || "No description provided."}
-        </p>
+        <p
+          className="text-gray-600 mt-4"
+          dangerouslySetInnerHTML={{
+            __html: parseDescription(objectData.description || ""),
+          }}
+        ></p>
       </main>
     </div>
   );

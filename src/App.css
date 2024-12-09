@@ -65,3 +65,14 @@ body {
   padding: 5px;
   width: 100px;
 }
+
+/* Inline link Styles */
+.inline-link {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.inline-link:hover {
+  color: #0056b3;
+  text-decoration: none;
+}

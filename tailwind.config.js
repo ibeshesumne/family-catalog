@@ -11,7 +11,6 @@ module.exports = {
         zenGray: '#f5f5f5',
         zenDark: '#333333',
         zenDarkText: '#f0f0f0',
-        // Google colors and other colors if needed...
         'google-blue': '#4285F4',
         'google-gray': '#202124',
         'google-light-gray': '#F8F9FA',
@@ -21,10 +20,17 @@ module.exports = {
         'google-red': '#EA4335',
         'google-yellow': '#FBBC05',
         'google-green': '#34A853',
+        bmDark: '#202124',
+        bmGreen: '#026a52',
+        bmLightGray: '#f8f9fa',
+        bmWhite: '#ffffff',
       },
       fontFamily: {
         sans: ['Roboto', 'Arial', 'sans-serif'],
         serif: ['Lora', 'Serif'],
+      },
+      maxHeight: {
+        'screen-minus-header-footer': 'calc(100vh - 200px)', // Custom height
       },
     },
   },

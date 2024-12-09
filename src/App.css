@@ -76,3 +76,72 @@ body {
   color: #0056b3;
   text-decoration: none;
 }
+
+/* Scrollable Content in Vertical Panel */
+.scroll-pane {
+  overflow-y: auto;
+  max-height: calc(100vh - 60px); /* Ensure content stays above the footer */
+}
+
+/* Zoomable Image Styles */
+.zoomable-image {
+  transition: transform 0.3s ease;
+}
+
+/* Dark Background for Header and Thumbnail Bar */
+.header {
+  background-color: #202124;
+  color: #ffffff;
+}
+
+/* Thumbnail Bar in Right Panel */
+.thumbnail-bar {
+  background-color: #202124; /* Dark background for thumbnails */
+  height: 60px; /* Matches vertical footer height */
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  padding: 0 10px;
+}
+
+/* Green Horizontal Bar in Left Panel */
+.vertical-footer {
+  background-color: #026a52; /* Green background */
+  height: 60px; /* Matches horizontal thumbnail bar height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  position: relative; /* Keeps it within the left panel */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  color: #ffffff;
+}
+
+/* Zoom Buttons */
+.zoom-button {
+  background-color: #202124;
+  color: #ffffff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.zoom-button:hover {
+  background-color: #444444;
+}
+
+.zoom-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Main Panel Adjustments */
+main {
+  overflow-y: hidden; /* Prevent scroll conflicts */
+}

@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { db, storage } from "../firebase";
 import { ref, update } from "firebase/database";
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { objectTypes } from "./constants";
 
 function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
   const [formData, setFormData] = useState({});
   const [newImages, setNewImages] = useState([]);
   const [newAudio, setNewAudio] = useState([]);
   const [imagesToDelete, setImagesToDelete] = useState([]);
+  const [filteredObjectTypes, setFilteredObjectTypes] = useState(objectTypes);
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
     if (selectedRecord) {
@@ -40,9 +43,39 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
         exhibition_history: selectedRecord.exhibition_history || "",
         condition: selectedRecord.condition || "",
         subjects: selectedRecord.subjects || "",
+        object_type: selectedRecord.object_type || "",
       });
     }
   }, [selectedRecord]);
+
+  const handleObjectTypeChange = (e) => {
+    const { value } = e.target;
+
+    setIsTyping(true);
+
+    setFormData((prev) => ({
+      ...prev,
+      object_type: value,
+    }));
+
+    const filtered = objectTypes.filter((type) =>
+      type.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredObjectTypes(filtered);
+  };
+
+  const handleObjectTypeBlur = () => {
+    setTimeout(() => {
+      setIsTyping(false);
+      if (!formData.object_type.trim()) {
+        setFormData((prev) => ({
+          ...prev,
+          object_type: selectedRecord.object_type,
+        }));
+      }
+      setFilteredObjectTypes([]);
+    }, 200);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -125,6 +158,43 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
   const renderInputFields = () => (
     <>
       {Object.entries(formData).map(([key, value]) => {
+        if (key === "object_type") {
+          return (
+            <div key={key} className="mb-4 relative">
+              <label className="block text-sm font-medium text-gray-700">Object Type</label>
+              <input
+                type="text"
+                name={key}
+                value={formData.object_type}
+                placeholder="Type to filter object types"
+                onChange={handleObjectTypeChange}
+                onBlur={handleObjectTypeBlur}
+                onFocus={() => setFilteredObjectTypes(objectTypes)}
+                className="block w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              {isTyping && filteredObjectTypes.length > 0 && (
+                <ul className="absolute z-10 bg-white border border-gray-300 rounded w-full max-h-40 overflow-auto shadow-lg">
+                  {filteredObjectTypes.slice(0, 50).map((type, index) => (
+                    <li
+                      key={index}
+                      onClick={() => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          object_type: type,
+                        }));
+                        setFilteredObjectTypes([]);
+                      }}
+                      className="cursor-pointer px-3 py-2 hover:bg-blue-100"
+                    >
+                      {type}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        }
+
         if (key === "object_images") {
           return (
             <div key={key} className="mb-4">

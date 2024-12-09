@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState} from "react";
 import { db, storage } from "../firebase"; // Import Firebase Storage
 import { ref as dbRef, set } from "firebase/database";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -55,6 +55,8 @@ const CreateData = ({ onCancel }) => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [filteredObjectTypes, setFilteredObjectTypes] = useState(objectTypes);
+  const [isTyping, setIsTyping] = useState(false);
 
   const toggleSection = (section) => {
     setOpenSections((prev) => ({
@@ -65,7 +67,33 @@ const CreateData = ({ onCancel }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+
+    setIsTyping(true);
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+
+    if (name === "object_type") {
+      const filtered = objectTypes.filter((type) =>
+        type.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredObjectTypes(filtered);
+    }
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => {
+      setIsTyping(false);
+      if (!formData.object_type.trim()) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          object_type: "Other",
+        }));
+      }
+      setFilteredObjectTypes([]);
+    }, 200);
   };
 
   const handleFileChange = (e, field) => {
@@ -124,7 +152,7 @@ const CreateData = ({ onCancel }) => {
       alert("Record added successfully!");
       setFormData({
         object_title: "",
-        object_type: "",
+        object_type: "Other",
         object_id: "",
         title: "",
         description: "",
@@ -198,20 +226,37 @@ const CreateData = ({ onCancel }) => {
               onChange={handleInputChange}
               className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
-            <select
-              name="object_type"
-              value={formData.object_type}
-              onChange={handleInputChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="">Select Object Type</option>
-              {objectTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <input
+                type="text"
+                name="object_type"
+                placeholder="Type to filter object types"
+                value={formData.object_type}
+                onFocus={() => setFilteredObjectTypes(objectTypes)}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              {isTyping && filteredObjectTypes.length > 0 && (
+                <ul className="absolute z-10 bg-white border border-gray-300 rounded w-full max-h-40 overflow-auto shadow-lg">
+                  {filteredObjectTypes.slice(0, 50).map((type, index) => (
+                    <li
+                      key={index}
+                      onClick={() => {
+                        setFormData((prevFormData) => ({
+                          ...prevFormData,
+                          object_type: type,
+                        }));
+                        setFilteredObjectTypes([]);
+                      }}
+                      className="cursor-pointer px-3 py-2 hover:bg-blue-100"
+                    >
+                      {type}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
             <input
               type="text"
               name="title"
@@ -540,3 +585,4 @@ const CreateData = ({ onCancel }) => {
 };
 
 export default CreateData;
+

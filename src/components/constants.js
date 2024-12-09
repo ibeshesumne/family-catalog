@@ -4978,5 +4978,6 @@ export const objectTypes = [
   "Zither",
   "Zong",
   "Zoomorphic brooch",
-  "Zun","Other", // Add more as needed
+  "Zun",
+  "Other", // Add more as needed
 ];

@@ -77,10 +77,10 @@ body {
   text-decoration: none;
 }
 
-/* Scrollable Content in Vertical Panel */
+/* Scrollable Pane for Object Details */
 .scroll-pane {
   overflow-y: auto;
-  max-height: calc(100vh - 60px); /* Ensure content stays above the footer */
+  max-height: calc(100vh - 60px); /* Ensures content stays above the footer */
 }
 
 /* Zoomable Image Styles */
@@ -96,7 +96,7 @@ body {
 
 /* Thumbnail Bar in Right Panel */
 .thumbnail-bar {
-  background-color: #202124; /* Dark background for thumbnails */
+  background-color: #202124;
   height: 60px; /* Matches vertical footer height */
   display: flex;
   align-items: center;
@@ -104,32 +104,26 @@ body {
   padding: 0 10px;
 }
 
-/* Green Horizontal Bar in Left Panel */
+/* Fixed Green Footer in Vertical Sidebar */
 .vertical-footer {
-  background-color: #026a52; /* Green background */
-  height: 60px; /* Matches horizontal thumbnail bar height */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  position: relative; /* Keeps it within the left panel */
+  background-color: #026a52;
+  height: 60px; /* Matches horizontal thumbnail bar */
+  position: sticky;
   bottom: 0;
-  left: 0;
   width: 100%;
-  color: #ffffff;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Zoom Buttons */
 .zoom-button {
   background-color: #202124;
-  color: #ffffff;
+  color: white;
+  border-radius: 50%;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .zoom-button:hover {
@@ -144,4 +138,15 @@ body {
 /* Main Panel Adjustments */
 main {
   overflow-y: hidden; /* Prevent scroll conflicts */
+}
+
+@screen md {
+  .tabs {
+    display: none; /* Hide tabs on desktop */
+  }
+}
+@screen sm {
+  .vertical-footer {
+    display: none; /* Hide footer navigation on mobile */
+  }
 }

@@ -12,7 +12,7 @@ const ObjectDetail = () => {
   const [objectData, setObjectData] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [zoomScale, setZoomScale] = useState(1); // Zoom functionality
-  const [view, setView] = useState("data"); // Toggle view for mobile (data/images)
+  const [view, setView] = useState(isMobile ? "images" : "data"); // Default to "images" on mobile
   const isMobile = useDeviceType(); // Detect if the user is on a mobile device
 
   // Fetch object data from Firebase
@@ -45,7 +45,7 @@ const ObjectDetail = () => {
       {isMobile ? (
         <>
           {/* Mobile Layout */}
-          <div className="tabs flex justify-around bg-gray-100 p-2 border-b">
+          <div className="tabs flex justify-around bg-bmGreen text-bmWhite p-2 border-b">
             <button
               className={`tab ${view === "data" ? "font-bold" : "text-gray-500"}`}
               onClick={() => setView("data")}

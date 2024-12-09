@@ -33,6 +33,12 @@ module.exports = {
         'screen-minus-header-footer': 'calc(100vh - 200px)', // Custom height
       },
     },
+    screens: {
+      sm: '640px',  // Mobile
+      md: '768px',  // Tablet
+      lg: '1024px', // Desktop
+    },
   },
+  variants: {},
   plugins: [],
 };

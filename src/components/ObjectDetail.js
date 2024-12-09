@@ -6,6 +6,7 @@ import { parseDescription } from "../utils/urlParser"; // Importing the updated 
 const ObjectDetail = () => {
   const { objectId } = useParams(); // Extract objectId from the URL
   const [objectData, setObjectData] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null); // State for main image
 
   useEffect(() => {
     const db = getDatabase();
@@ -13,7 +14,11 @@ const ObjectDetail = () => {
 
     onValue(objectRef, (snapshot) => {
       if (snapshot.exists()) {
-        setObjectData(snapshot.val());
+        const data = snapshot.val();
+        setObjectData(data);
+        if (data.object_images && data.object_images.length > 0) {
+          setSelectedImage(data.object_images[0]); // Default to the first image
+        }
       } else {
         console.error("Object not found for ID:", objectId);
         setObjectData(null);
@@ -48,22 +53,19 @@ const ObjectDetail = () => {
             <h3 className="text-sm font-bold capitalize text-gray-700">
               {key.replace(/_/g, " ")}:
             </h3>
-            {console.log("Parsed bibliographic_references:", parseDescription(objectData.bibliographic_references || ""))}
-            {/* Parsing the value and rendering as HTML */}
             <p
               className="text-sm text-gray-600 mt-1"
               dangerouslySetInnerHTML={{ __html: parseDescription(value) }}
             ></p>
-            {console.log("Parsed HTML:", parseDescription(value))}
           </div>
         ))}
       </aside>
 
       {/* Main Content Area */}
       <main className="w-full md:w-2/3 p-6 rounded-lg shadow text-center">
-        {objectData.object_images && objectData.object_images.length > 0 ? (
+        {selectedImage ? (
           <img
-            src={objectData.object_images[0]}
+            src={selectedImage}
             alt={objectData.title || "Object Image"}
             className="w-full max-h-96 object-contain mb-6 rounded"
           />
@@ -79,6 +81,24 @@ const ObjectDetail = () => {
             __html: parseDescription(objectData.description || ""),
           }}
         ></p>
+
+        {/* Thumbnails for image selection */}
+        <div className="flex justify-center mt-4 space-x-4">
+          {objectData.object_images &&
+            objectData.object_images.map((image, index) => (
+              <img
+                key={index}
+                src={image}
+                alt={`Thumbnail ${index + 1}`}
+                className={`w-20 h-20 object-cover cursor-pointer rounded border ${
+                  image === selectedImage
+                    ? "border-blue-500"
+                    : "border-gray-300"
+                }`}
+                onClick={() => setSelectedImage(image)} // Update the main image
+              />
+            ))}
+        </div>
       </main>
     </div>
   );

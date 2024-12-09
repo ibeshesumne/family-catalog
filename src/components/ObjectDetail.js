@@ -5,8 +5,6 @@ import { parseDescription } from "../utils/urlParser";
 import useDeviceType from "../hooks/useDeviceType";
 import MobileImageViewer from "./MobileImageViewer";
 import DesktopImageViewer from "./DesktopImageViewer";
-import MobileObjectDetails from "./MobileObjectDetails";
-import DesktopObjectDetails from "./DesktopObjectDetails";
 
 const ObjectDetail = () => {
   const { objectId } = useParams();
@@ -14,8 +12,6 @@ const ObjectDetail = () => {
   const isMobile = useDeviceType(); // Detect if the user is on a mobile device
   const [view, setView] = useState(isMobile ? "images" : "data"); // Default to "images" on mobile
   const [objectData, setObjectData] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [zoomScale, setZoomScale] = useState(1); // Zoom functionality
 
   // Fetch object data from Firebase
   useEffect(() => {
@@ -26,9 +22,6 @@ const ObjectDetail = () => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         setObjectData(data);
-        if (data.object_images && data.object_images.length > 0) {
-          setSelectedImage(data.object_images[0]);
-        }
       } else {
         console.error("Object not found for ID:", objectId);
         setObjectData(null);
@@ -40,8 +33,6 @@ const ObjectDetail = () => {
     return <p className="text-center text-gray-500">Loading...</p>;
   }
 
-  const resetZoom = () => setZoomScale(1); // Reset zoom to original scale
-
   // Fields to exclude from the left vertical panel
   const excludedFields = [
     "createdByEmail",
@@ -50,6 +41,31 @@ const ObjectDetail = () => {
     "object_images",
     "thumbnailUrl",
   ];
+
+  const orderedFields = [
+    "object_type",
+    "object_id",
+    "description",
+    "materials",
+    "dimensions_h_w_d",
+    "object_location",
+    "inscriptions",
+    "technique",
+    "object_title",
+    "curator_comment",
+  ];
+
+  // Get other fields alphabetically
+  const remainingFields = Object.keys(objectData || {})
+    .filter(
+      (key) =>
+        !orderedFields.includes(key) && // Exclude explicitly ordered fields
+        objectData[key] && // Ensure the field has content
+        !excludedFields.includes(key) // Exclude fields
+    )
+    .sort(); // Sort alphabetically
+
+  const finalFieldsOrder = [...orderedFields, ...remainingFields];
 
   return (
     <div className="flex flex-col md:flex-row p-6 max-w-6xl mx-auto gap-6">
@@ -77,23 +93,17 @@ const ObjectDetail = () => {
                 style={{ maxHeight: "calc(100vh - 60px)" }}
               >
                 <h2 className="mb-6 text-xl font-bold">Object Details</h2>
-                {Object.entries(objectData || {})
-                  .filter(
-                    ([key, value]) =>
-                      value && // Ensure the field has content (not null, undefined, or empty string)
-                      !excludedFields.includes(key) // Exclude specific fields
-                  )
-                  .map(([key, value]) => (
-                    <div key={key} className="mb-4">
-                      <h3 className="text-sm font-bold capitalize text-gray-700">
-                        {key.replace(/_/g, " ")}:
-                      </h3>
-                      <p
-                        className="text-sm text-gray-600 mt-1"
-                        dangerouslySetInnerHTML={{ __html: parseDescription(value) }}
-                      ></p>
-                    </div>
-                  ))}
+                {finalFieldsOrder.map((key) => (
+                  <div key={key} className="mb-4">
+                    <h3 className="text-sm font-bold capitalize text-gray-700">
+                      {key.replace(/_/g, " ")}:
+                    </h3>
+                    <p
+                      className="text-sm text-gray-600 mt-1"
+                      dangerouslySetInnerHTML={{ __html: parseDescription(objectData[key]) }}
+                    ></p>
+                  </div>
+                ))}
               </div>
               <div className="p-4 bg-bmGreen text-bmWhite text-center" style={{ height: "60px" }}>
                 <button
@@ -118,23 +128,17 @@ const ObjectDetail = () => {
               style={{ maxHeight: "calc(100vh - 60px)" }}
             >
               <h2 className="mb-6 text-xl font-bold">Object Details</h2>
-              {Object.entries(objectData || {})
-                .filter(
-                  ([key, value]) =>
-                    value && // Ensure the field has content (not null, undefined, or empty string)
-                    !excludedFields.includes(key) // Exclude specific fields
-                )
-                .map(([key, value]) => (
-                  <div key={key} className="mb-4">
-                    <h3 className="text-sm font-bold capitalize text-gray-700">
-                      {key.replace(/_/g, " ")}:
-                    </h3>
-                    <p
-                      className="text-sm text-gray-600 mt-1"
-                      dangerouslySetInnerHTML={{ __html: parseDescription(value) }}
-                    ></p>
-                  </div>
-                ))}
+              {finalFieldsOrder.map((key) => (
+                <div key={key} className="mb-4">
+                  <h3 className="text-sm font-bold capitalize text-gray-700">
+                    {key.replace(/_/g, " ")}:
+                  </h3>
+                  <p
+                    className="text-sm text-gray-600 mt-1"
+                    dangerouslySetInnerHTML={{ __html: parseDescription(objectData[key]) }}
+                  ></p>
+                </div>
+              ))}
             </div>
             <div className="p-4 bg-bmGreen text-bmWhite text-center" style={{ height: "60px" }}>
               <button

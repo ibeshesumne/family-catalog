@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ref, get, remove, set } from "firebase/database";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+//import { createUserWithEmailAndPassword } from "firebase/auth";//
 import { db, auth } from "../../firebase";
 
 const AdminDashboard = () => {

@@ -14,6 +14,8 @@ import ObjectDetail from "./components/ObjectDetail"; // Import ObjectDetail Com
 import CreatePage from "./components/CreateData"; // Import the CreatePage component
 import ResultsPage from "./components/ResultsPage"; // Import ResultsPage Component
 import AdminDashboard from './components/Admin/AdminDashboard'; // Import Admin Dashboard
+import ProducerManager from "./components/ProducerManager";
+import ProducerDetail from "./components/ProducerDetail"; // Import the ProducerDetail component
 
 function App() {
   return (
@@ -74,6 +76,18 @@ function App() {
                 <AdminDashboard />
               </ProtectedRoute>
             }
+          />
+          <Route 
+            path="/producers" 
+            element={
+              <ProducerManager />
+            } 
+          />
+          <Route 
+            path="/producers/:producerName" 
+            element={
+            <ProducerDetail />
+            } 
           />
         </Routes>
       </main>

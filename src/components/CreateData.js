@@ -1,6 +1,6 @@
-import React, { useState} from "react";
+import React, { useState, useEffect } from "react";
 import { db, storage } from "../firebase"; // Import Firebase Storage
-import { ref as dbRef, set } from "firebase/database";
+import { ref as dbRef, set, ref, onValue } from "firebase/database";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useAuth } from "./Auth/AuthContext";
 import { Collapse } from "react-collapse";
@@ -57,6 +57,21 @@ const CreateData = ({ onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [filteredObjectTypes, setFilteredObjectTypes] = useState(objectTypes);
   const [isTyping, setIsTyping] = useState(false);
+  const [producers, setProducers] = useState([]);
+
+  useEffect(() => {
+    const producersRef = ref(db, "producers");
+    onValue(producersRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const producerList = Object.entries(data).map(([id, details]) => ({
+          id,
+          name: details.name,
+        }));
+        setProducers(producerList);
+      }
+    });
+  }, []);
 
   const toggleSection = (section) => {
     setOpenSections((prev) => ({
@@ -302,14 +317,27 @@ const CreateData = ({ onCancel }) => {
               onChange={handleInputChange}
               className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
-            <input
-              type="text"
+            <label htmlFor="producer_name">Producer</label>
+            <select
               name="producer_name"
-              placeholder="Producer Name"
               value={formData.producer_name}
               onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+              className="form-select"
+            >
+              <option value="">Select Producer</option>
+              {producers.map((producer) => (
+                <option key={producer.id} value={producer.name}>
+                  {producer.name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => window.location.assign("/producers")}
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Manage Producers
+            </button>
             <input
               type="text"
               name="school_style"

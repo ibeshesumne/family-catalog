@@ -65,7 +65,10 @@ const ObjectDetail = () => {
     )
     .sort(); // Sort alphabetically
 
-  const finalFieldsOrder = [...orderedFields, ...remainingFields];
+  // Final fields order, filtered to exclude empty values
+  const finalFieldsOrder = [...orderedFields, ...remainingFields].filter(
+    (key) => objectData[key] && objectData[key].toString().trim() !== ""
+  );
 
   return (
     <div className="flex flex-col md:flex-row p-6 max-w-6xl mx-auto gap-6">
@@ -100,12 +103,17 @@ const ObjectDetail = () => {
                     </h3>
                     <p
                       className="text-sm text-gray-600 mt-1"
-                      dangerouslySetInnerHTML={{ __html: parseDescription(objectData[key]) }}
+                      dangerouslySetInnerHTML={{
+                        __html: parseDescription(objectData[key]),
+                      }}
                     ></p>
                   </div>
                 ))}
               </div>
-              <div className="p-4 bg-bmGreen text-bmWhite text-center" style={{ height: "60px" }}>
+              <div
+                className="p-4 bg-bmGreen text-bmWhite text-center"
+                style={{ height: "60px" }}
+              >
                 <button
                   onClick={() => navigate(-1)}
                   className="flex items-center justify-center text-sm font-bold"
@@ -135,12 +143,17 @@ const ObjectDetail = () => {
                   </h3>
                   <p
                     className="text-sm text-gray-600 mt-1"
-                    dangerouslySetInnerHTML={{ __html: parseDescription(objectData[key]) }}
+                    dangerouslySetInnerHTML={{
+                      __html: parseDescription(objectData[key]),
+                    }}
                   ></p>
                 </div>
               ))}
             </div>
-            <div className="p-4 bg-bmGreen text-bmWhite text-center" style={{ height: "60px" }}>
+            <div
+              className="p-4 bg-bmGreen text-bmWhite text-center"
+              style={{ height: "60px" }}
+            >
               <button
                 onClick={() => navigate(-1)}
                 className="flex items-center justify-center text-sm font-bold"

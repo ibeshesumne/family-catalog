@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { getDatabase, ref, onValue } from "firebase/database";
 import { parseDescription } from "../utils/urlParser";
 import useDeviceType from "../hooks/useDeviceType";
@@ -70,20 +70,49 @@ const ObjectDetail = () => {
     (key) => objectData[key] && objectData[key].toString().trim() !== ""
   );
 
+  // Function to render fields
   const renderFields = () =>
-    finalFieldsOrder.map((key) => (
-      <div key={key} className="mb-4">
-        <h3 className="text-sm font-bold capitalize text-gray-700">
-          {key.replace(/_/g, " ")}:
-        </h3>
-        <p
-          className="text-sm text-gray-600 mt-1"
-          dangerouslySetInnerHTML={{
-            __html: parseDescription(objectData[key]),
-          }}
-        ></p>
-      </div>
-    ));
+    finalFieldsOrder.map((key) => {
+      if (key === "producer_name") {
+        // Split producer_name into prefix and name
+        const producerField = objectData.producer_name || "";
+        const colonIndex = producerField.indexOf(":");
+        const prefix =
+          colonIndex !== -1 ? producerField.substring(0, colonIndex).trim() : "";
+        const name =
+          colonIndex !== -1
+            ? producerField.substring(colonIndex + 1).trim()
+            : producerField;
+
+        return (
+          <div key={key} className="mb-4">
+            <h3 className="text-sm font-bold capitalize text-gray-700">
+              Producer Name:
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              {prefix}:{" "}
+              <Link to={`/producers/${name}`} className="text-blue-500 underline">
+                {name}
+              </Link>
+            </p>
+          </div>
+        );
+      } else {
+        return (
+          <div key={key} className="mb-4">
+            <h3 className="text-sm font-bold capitalize text-gray-700">
+              {key.replace(/_/g, " ")}:
+            </h3>
+            <p
+              className="text-sm text-gray-600 mt-1"
+              dangerouslySetInnerHTML={{
+                __html: parseDescription(objectData[key]),
+              }}
+            ></p>
+          </div>
+        );
+      }
+    });
 
   return (
     <div className="flex flex-col md:flex-row p-6 max-w-6xl mx-auto gap-6">

@@ -70,6 +70,21 @@ const ObjectDetail = () => {
     (key) => objectData[key] && objectData[key].toString().trim() !== ""
   );
 
+  const renderFields = () =>
+    finalFieldsOrder.map((key) => (
+      <div key={key} className="mb-4">
+        <h3 className="text-sm font-bold capitalize text-gray-700">
+          {key.replace(/_/g, " ")}:
+        </h3>
+        <p
+          className="text-sm text-gray-600 mt-1"
+          dangerouslySetInnerHTML={{
+            __html: parseDescription(objectData[key]),
+          }}
+        ></p>
+      </div>
+    ));
+
   return (
     <div className="flex flex-col md:flex-row p-6 max-w-6xl mx-auto gap-6">
       {isMobile ? (
@@ -96,19 +111,7 @@ const ObjectDetail = () => {
                 style={{ maxHeight: "calc(100vh - 60px)" }}
               >
                 <h2 className="mb-6 text-xl font-bold">Object Details</h2>
-                {finalFieldsOrder.map((key) => (
-                  <div key={key} className="mb-4">
-                    <h3 className="text-sm font-bold capitalize text-gray-700">
-                      {key.replace(/_/g, " ")}:
-                    </h3>
-                    <p
-                      className="text-sm text-gray-600 mt-1"
-                      dangerouslySetInnerHTML={{
-                        __html: parseDescription(objectData[key]),
-                      }}
-                    ></p>
-                  </div>
-                ))}
+                {renderFields()}
               </div>
               <div
                 className="p-4 bg-bmGreen text-bmWhite text-center"
@@ -136,19 +139,7 @@ const ObjectDetail = () => {
               style={{ maxHeight: "calc(100vh - 60px)" }}
             >
               <h2 className="mb-6 text-xl font-bold">Object Details</h2>
-              {finalFieldsOrder.map((key) => (
-                <div key={key} className="mb-4">
-                  <h3 className="text-sm font-bold capitalize text-gray-700">
-                    {key.replace(/_/g, " ")}:
-                  </h3>
-                  <p
-                    className="text-sm text-gray-600 mt-1"
-                    dangerouslySetInnerHTML={{
-                      __html: parseDescription(objectData[key]),
-                    }}
-                  ></p>
-                </div>
-              ))}
+              {renderFields()}
             </div>
             <div
               className="p-4 bg-bmGreen text-bmWhite text-center"

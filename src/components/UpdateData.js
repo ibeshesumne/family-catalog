@@ -48,6 +48,20 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
     }
   }, [selectedRecord]);
 
+  // Clean the data to remove undefined values
+  const cleanData = (data) => {
+    if (Array.isArray(data)) {
+      return data.filter((item) => item !== undefined); // Remove undefined values from arrays
+    } else if (typeof data === "object" && data !== null) {
+      return Object.fromEntries(
+        Object.entries(data)
+          .filter(([_, value]) => value !== undefined) // Remove undefined values
+          .map(([key, value]) => [key, cleanData(value)]) // Recursively clean nested objects/arrays
+      );
+    }
+    return data; // Return value as is for non-object types
+  };
+
   const handleObjectTypeChange = (e) => {
     const { value } = e.target;
 
@@ -118,6 +132,7 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
     return { urls, thumbnailUrl };
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -127,7 +142,10 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
     }
 
     const recordRef = ref(db, `objects/${formData.object_id}`);
-    const updatedRecord = { ...formData, modifiedDate: new Date().toISOString() };
+
+    // Clean the formData to remove undefined values
+    const cleanedData = cleanData(formData);
+    console.log("Cleaned Data:", cleanedData);
 
     try {
       for (const imageUrl of imagesToDelete) {
@@ -137,18 +155,18 @@ function UpdateData({ selectedRecord, onRecordUpdated, onCancel }) {
 
       if (newImages.length > 0) {
         const { urls: imageUrls, thumbnailUrl } = await uploadFiles(newImages, "images");
-        updatedRecord.object_images = [...(formData.object_images || []), ...imageUrls];
-        updatedRecord.thumbnailUrl = thumbnailUrl || updatedRecord.thumbnailUrl;
+        cleanedData.object_images = [...(cleanedData.object_images || []), ...imageUrls];
+        cleanedData.thumbnailUrl = thumbnailUrl || cleanedData.thumbnailUrl;
       }
 
       if (newAudio.length > 0) {
         const audioUrls = await uploadFiles(newAudio, "audio");
-        updatedRecord.object_audio = [...(formData.object_audio || []), ...audioUrls];
+        cleanedData.object_audio = [...(cleanedData.object_audio || []), ...audioUrls];
       }
 
-      await update(recordRef, updatedRecord);
+      await update(recordRef, cleanedData);
       alert("Record updated successfully!");
-      if (onRecordUpdated) onRecordUpdated(updatedRecord);
+      if (onRecordUpdated) onRecordUpdated(cleanedData);
     } catch (error) {
       console.error("Error updating record:", error.message);
       alert("Failed to update record. Please try again.");

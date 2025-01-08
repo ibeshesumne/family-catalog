@@ -1,8 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const DesktopImageViewer = ({ images }) => {
-  const [selectedImage, setSelectedImage] = useState(images[0]);
+const DesktopImageViewer = ({ images = [] }) => {
+  const [selectedImage, setSelectedImage] = useState(null);
   const [zoomScale, setZoomScale] = useState(1);
+
+  // Set the first image as the default selected image when images prop changes
+  useEffect(() => {
+    if (images.length > 0) {
+      setSelectedImage(images[0]);
+    } else {
+      setSelectedImage(null);
+    }
+  }, [images]);
 
   const resetZoom = () => setZoomScale(1);
 
@@ -24,24 +33,24 @@ const DesktopImageViewer = ({ images }) => {
         <div className="absolute bottom-4 right-4 flex space-x-2">
           <button
             onClick={() => setZoomScale(Math.min(zoomScale + 0.1, 3))}
-            className="zoom-button"
+            className="zoom-button bg-gray-300 text-black px-2 py-1 rounded"
           >
             +
           </button>
           <button
             onClick={() => setZoomScale(Math.max(zoomScale - 0.1, 1))}
-            className="zoom-button"
+            className="zoom-button bg-gray-300 text-black px-2 py-1 rounded"
           >
             -
           </button>
-          <button onClick={resetZoom} className="zoom-button">
+          <button onClick={resetZoom} className="zoom-button bg-gray-300 text-black px-2 py-1 rounded">
             ⤢
           </button>
         </div>
       </div>
       {/* Thumbnail Bar */}
       <div className="thumbnail-bar flex space-x-4 overflow-x-auto bg-gray-200 p-2 rounded">
-        {images &&
+        {images.length > 0 ? (
           images.map((image, index) => (
             <img
               key={index}
@@ -52,7 +61,10 @@ const DesktopImageViewer = ({ images }) => {
               }`}
               onClick={() => setSelectedImage(image)}
             />
-          ))}
+          ))
+        ) : (
+          <p className="text-gray-500 text-sm">No thumbnails available</p>
+        )}
       </div>
     </div>
   );

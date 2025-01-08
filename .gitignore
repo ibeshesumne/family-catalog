@@ -35,3 +35,4 @@ yarn-error.log*
 # Firebase Admin SDK Service Account Key
 family-catalog-firebase-adminsdk-r4r0r-f71d5528cd.json
 family-catalog-9dffb7974d0e.json
+.vercel

@@ -129,4 +129,4 @@ export const fetchFileURL = async (path) => {
 };
 
 // Enable logging for Firebase
-enableLogging(true);
+enableLogging(false);
